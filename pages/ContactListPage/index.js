@@ -3,12 +3,8 @@ import {
     PermissionsAndroid,
     Platform,
     SafeAreaView,
-    ScrollView,
     StyleSheet,
-    FlatList,
-    View,
-    ActivityIndicator
-} from "react-native";
+    FlatList} from "react-native";
 import Contacts from "react-native-contacts";
 
 import ListItem from "../../components/listitem";

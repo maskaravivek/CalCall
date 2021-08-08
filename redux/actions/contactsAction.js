@@ -4,4 +4,3 @@ export default syncContacts = contacts => (
         payload: contacts,
     }
 );
-
