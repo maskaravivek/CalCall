@@ -322,6 +322,8 @@ PODS:
     - React-perflogger (= 0.64.1)
   - RNCalendarEvents (2.2.0):
     - React
+  - RNCAsyncStorage (1.15.5):
+    - React-Core
   - RNGestureHandler (1.10.3):
     - React-Core
   - RNScreens (3.5.0):
@@ -383,6 +385,7 @@ DEPENDENCIES:
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RNCalendarEvents (from `../node_modules/react-native-calendar-events`)
+  - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -463,6 +466,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCalendarEvents:
     :path: "../node_modules/react-native-calendar-events"
+  RNCAsyncStorage:
+    :path: "../node_modules/@react-native-async-storage/async-storage"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNScreens:
@@ -512,6 +517,7 @@ SPEC CHECKSUMS:
   React-runtimeexecutor: ff951a0c241bfaefc4940a3f1f1a229e7cb32fa6
   ReactCommon: bedc99ed4dae329c4fcf128d0c31b9115e5365ca
   RNCalendarEvents: 7e65eb4a94f53c1744d1e275f7fafcfaa619f7a3
+  RNCAsyncStorage: 56a3355a10b5d660c48c6e37325ac85ebfd09885
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNScreens: 01ab149b5dd5c27f5ff26741b1d2bdf2cee1af35
   Yoga: a7de31c64fe738607e7a3803e3f591a4b1df7393

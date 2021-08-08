@@ -5,6 +5,7 @@ import {
     SafeAreaView,
     ScrollView,
     StyleSheet,
+    FlatList,
     View,
     ActivityIndicator
 } from "react-native";
@@ -14,15 +15,16 @@ import ListItem from "../../components/listitem";
 import Avatar from "../../components/avatar";
 import { Linking } from 'react-native'
 import RNCalendarEvents from "react-native-calendar-events";
-
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import syncContacts from '../../redux/actions/contactsAction'
 
 type Props = {};
-export default class ContactList extends Component<Props> {
+class ContactList extends Component<Props> {
     constructor(props) {
         super(props);
 
         this.state = {
-            contacts: [],
             loading: true
         };
 
@@ -31,7 +33,7 @@ export default class ContactList extends Component<Props> {
 
     async componentDidMount() {
         this.syncContacts()
-        this.syncCalendar()
+        // this.syncCalendar()
     }
 
     syncCalendar() {
@@ -66,7 +68,6 @@ export default class ContactList extends Component<Props> {
                 this.loadContacts();
             });
         } else {
-            console.log("else block")
             this.loadContacts();
         }
     }
@@ -92,7 +93,8 @@ export default class ContactList extends Component<Props> {
                             "phoneNumbers": c["phoneNumbers"],
                         }
                     })
-                this.setState({ contacts: trimmedContacts, loading: false });
+                this.props.syncContacts(trimmedContacts)
+                this.setState({ loading: false });
             })
             .catch(e => {
                 this.setState({ loading: false });
@@ -102,56 +104,36 @@ export default class ContactList extends Component<Props> {
     }
 
     onPressContact(phoneNumbers) {
-        console.log(phoneNumbers)
         Linking.openURL(`tel:${phoneNumbers[0].number}`)
     }
 
     render() {
         return (
             <SafeAreaView style={styles.container}>
-                <View
-                    style={{
-                        paddingLeft: 100,
-                        paddingRight: 100,
-                        justifyContent: "center",
-                        alignItems: "center"
-                    }}
-                >
-                </View>
-                {
-                    this.state.loading === true ?
-                        (
-                            <View style={styles.spinner}>
-                                <ActivityIndicator size="large" color="#0000ff" />
-                            </View>
-                        ) : (
-                            <ScrollView style={{ flex: 1 }}>
-                                {this.state.contacts.map(contact => {
-                                    return (
-                                        <ListItem
-                                            leftElement={
-                                                <Avatar
-                                                    img={
-                                                        contact.hasThumbnail
-                                                            ? { uri: contact.thumbnailPath }
-                                                            : undefined
-                                                    }
-                                                    placeholder={getAvatarInitials(
-                                                        `${contact["givenName"]} ${contact["familyName"]}`
-                                                    )}
-                                                    width={40}
-                                                    height={40}
-                                                />
-                                            }
-                                            key={contact["recordID"]}
-                                            title={`${contact["givenName"]} ${contact["familyName"]}`}
-                                            onPress={() => this.onPressContact(contact["phoneNumbers"])}
-                                        />
-                                    );
-                                })}
-                            </ScrollView>
-                        )
-                }
+                <FlatList
+                    data={this.props.contacts.contacts}
+                    keyExtractor={item => item.recordID}
+                    renderItem={({ item }) => <ListItem
+                        leftElement={
+                            <Avatar
+                                img={
+                                    item.hasThumbnail
+                                        ? { uri: item.thumbnailPath }
+                                        : undefined
+                                }
+                                placeholder={getAvatarInitials(
+                                    `${item["givenName"]} ${item["familyName"]}`
+                                )}
+                                width={40}
+                                height={40}
+                            />
+                        }
+                        key={item["recordID"]}
+                        title={`${item["givenName"]} ${item["familyName"]}`}
+                        onPress={() => this.onPressContact(item["phoneNumbers"])}
+                    />
+                    }
+                />
 
             </SafeAreaView>
         );
@@ -160,20 +142,14 @@ export default class ContactList extends Component<Props> {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
-    },
-    spinner: {
         flex: 1,
-        flexDirection: 'column',
-        alignContent: "center",
-        justifyContent: "center"
+        paddingTop: 22
     },
-    inputStyle: {
-        height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
-        textAlign: "center"
-    }
+    item: {
+        padding: 10,
+        fontSize: 18,
+        height: 44,
+    },
 });
 
 const getAvatarInitials = textString => {
@@ -190,3 +166,16 @@ const getAvatarInitials = textString => {
 
     return initials;
 };
+
+const mapStateToProps = (state) => {
+    const { contacts } = state
+    return { contacts }
+};
+
+const mapDispatchToProps = dispatch => (
+    bindActionCreators({
+        syncContacts,
+    }, dispatch)
+);
+
+export default connect(mapStateToProps, mapDispatchToProps)(ContactList);
