@@ -32,6 +32,7 @@ class ContactList extends Component<Props> {
     async componentDidMount() {
         this.syncContacts()
         this.syncCalendar()
+        this.getSubscribedUserEvents(['4803528702'])
     }
 
     async deleteOldEvents() {
@@ -47,6 +48,31 @@ class ContactList extends Component<Props> {
         });
 
         return batch.commit();
+    }
+
+    getSubscribedUserEvents(subscribedList) {
+        firestore().collection('Users')
+            .where('phoneNumber', 'in', subscribedList)
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach((doc) => {
+                    console.log(doc.id, " => ", doc.data());
+                    this.getUserEvents(doc.id)
+                });
+            });
+    }
+
+    getUserEvents(uid) {
+        firestore().collection('Users')
+            .doc(uid)
+            .collection('userEvents')
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach((doc) => {
+                    console.log(doc.id, " => ", doc.data());
+                    this.getUserEvents(doc.id)
+                });
+            })
     }
 
     syncCalendar() {
