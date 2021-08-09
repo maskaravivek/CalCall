@@ -4,7 +4,8 @@ import {
     Platform,
     SafeAreaView,
     StyleSheet,
-    FlatList} from "react-native";
+    FlatList
+} from "react-native";
 import Contacts from "react-native-contacts";
 
 import ListItem from "../../components/listitem";
@@ -14,6 +15,7 @@ import RNCalendarEvents from "react-native-calendar-events";
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import syncContacts from '../../redux/actions/contactsAction'
+import firestore from '@react-native-firebase/firestore';
 
 type Props = {};
 class ContactList extends Component<Props> {
@@ -29,28 +31,61 @@ class ContactList extends Component<Props> {
 
     async componentDidMount() {
         this.syncContacts()
+        this.syncCalendar()
+    }
+
+    async deleteOldEvents() {
+        const usersQuerySnapshot = await firestore().collection('Users')
+            .doc(this.props.user.user.uid)
+            .collection('userEvents')
+            .where('endDate', '<', Date.now())
+            .get()
+        const batch = firestore().batch();
+
+        usersQuerySnapshot.forEach(documentSnapshot => {
+            batch.delete(documentSnapshot.ref);
+        });
+
+        return batch.commit();
     }
 
     syncCalendar() {
+        this.deleteOldEvents()
         RNCalendarEvents.checkPermissions(readOnly = true)
             .then(result => {
                 if (result === "authorized") {
-                    RNCalendarEvents.findCalendars().then(calendars => {
-                        calendars.forEach(calendar => {
-                            console.log(calendar.title)
-                            const startDate = new Date()
-                            var endDate = this.addDays(startDate, 7)
-                            console.log(startDate, endDate)
-                            RNCalendarEvents.fetchAllEvents(startDate.toISOString(), endDate.toISOString(), [calendar.id])
-                                .then(events => {
-                                    console.log(events)
-                                });
-                        })
-                    });
+                    this.props.calendars.calendars.forEach(calendar => {
+                        const startDate = new Date()
+                        var endDate = this.addDays(startDate, 7)
+                        RNCalendarEvents.fetchAllEvents(startDate.toISOString(), endDate.toISOString(), [calendar.id])
+                            .then(events => {
+                                events.forEach(event => {
+                                    const eventObj = {
+                                        "title": event.title,
+                                        "availability": event.availability,
+                                        "startDate": this.getTimeInEpoch(event.startDate),
+                                        "endDate": this.getTimeInEpoch(event.endDate)
+                                    }
+                                    this.saveEvent(event.id, eventObj)
+                                })
+                            });
+                    })
                 } else {
                     RNCalendarEvents.requestPermissions(readOnly = true);
                 }
             });
+    }
+
+    getTimeInEpoch(isoDateString) {
+        return Date.parse(isoDateString);
+    }
+
+    saveEvent(eventId, event) {
+        firestore().collection('Users')
+            .doc(this.props.user.user.uid)
+            .collection('userEvents')
+            .doc(eventId)
+            .set(event);
     }
 
     syncContacts() {
@@ -158,8 +193,8 @@ const getAvatarInitials = textString => {
 };
 
 const mapStateToProps = (state) => {
-    const { contacts } = state
-    return { contacts }
+    const { contacts, calendars, user } = state
+    return { contacts, calendars, user }
 };
 
 const mapDispatchToProps = dispatch => (
