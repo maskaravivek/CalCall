@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ContactList from './pages/ContactListPage';
 import ChooseCalendars from './pages/ChooseCalendarsPage';
+import SettingsPage from './pages/SettingsPage';
 import { Provider } from 'react-redux';
 import { store, persistor } from './redux/store';
 import { PersistGate } from 'redux-persist/integration/react'
@@ -13,12 +14,12 @@ import { Appbar, Menu } from 'react-native-paper';
 
 const Stack = createNativeStackNavigator();
 
-function CustomNavigationBar({ navigation, previous }) {
+function CustomNavigationBar({ navigation, options }) {
   return (
     <Appbar.Header>
-      {previous ? <Appbar.BackAction onPress={navigation.goBack} /> : null}
-      <Appbar.Content title="CalCall" />
-      <Appbar.Action icon="cog-outline" onPress={() => navigation.navigate("Calendars")} />
+      {options.previous ? <Appbar.BackAction onPress={navigation.goBack} /> : null}
+      <Appbar.Content title={options.title} />
+      {!options.previous && <Appbar.Action icon="cog-outline" onPress={() => navigation.navigate("Settings")} />}
     </Appbar.Header>
   );
 }
@@ -32,10 +33,11 @@ function App() {
             <Stack.Navigator
               initialRouteName="Home"
               screenOptions={{
-                header: CustomNavigationBar,
+                header: (props) => <CustomNavigationBar {...props} />,
               }}>
-              <Stack.Screen name="Contacts" component={ContactList} />
-              <Stack.Screen name="Calendars" component={ChooseCalendars} />
+              <Stack.Screen name="Contacts" component={ContactList} options={{ title: 'Contacts' }}/>
+              <Stack.Screen name="Settings" component={SettingsPage} options={{ title: 'Settings', previous: true }}/>
+              <Stack.Screen name="Calendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: true }}/>
             </Stack.Navigator>
           </NavigationContainer>
         </PaperProvider>

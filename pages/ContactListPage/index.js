@@ -29,7 +29,6 @@ class ContactList extends Component<Props> {
 
     async componentDidMount() {
         this.syncContacts()
-        // this.syncCalendar()
     }
 
     syncCalendar() {
