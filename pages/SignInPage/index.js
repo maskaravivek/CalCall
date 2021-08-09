@@ -4,6 +4,8 @@ import {
     Text,
     SafeAreaView,
     StyleSheet,
+    Button,
+    TextInput,
     TouchableHighlight
 } from "react-native";
 import { Icon } from 'react-native-elements'
@@ -12,15 +14,27 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import setUser from '../../redux/actions/userAction'
+import firestore from '@react-native-firebase/firestore';
+import Modal from 'react-native-modal';
 
 
 import { ScrollView } from "react-native-gesture-handler";
 
 class SignInPage extends React.Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            isModalVisisble: false,
+            phoneNumber: null,
+            uid: null
+        };
+        this.linkPhoneNumber = this.linkPhoneNumber.bind(this)
+    }
+
     async componentDidMount() {
         this._configureGoogleSignIn();
-        if (await GoogleSignin.isSignedIn()) {
+        if (await GoogleSignin.isSignedIn() && this.props.user.user.phoneNumber !== undefined) {
             this.props.navigation.navigate('Contacts')
         }
     }
@@ -40,21 +54,91 @@ class SignInPage extends React.Component {
         const googleCredential = auth.GoogleAuthProvider.credential(idToken);
 
         // Sign-in the user with the credential
-        return auth().signInWithCredential(googleCredential);
+        const user = await auth().signInWithCredential(googleCredential);
+        this.checkAndInsertUser(user)
+    }
+
+    linkPhoneNumber() {
+        firestore().collection('Users')
+            .doc(this.state.uid)
+            .update({
+                phoneNumber: this.state.phoneNumber
+            }).then(() => {
+                console.log('Phone Number linked!');
+                this.setState({
+                    isModalVisisble: false
+                })
+                this.saveUserAndNavigateToHome(this.state.uid)
+            });
+    }
+
+    checkAndInsertUser(user) {
+        const uid = user.user.uid;
+        const userDocRef = firestore().collection('Users').doc(uid);
+
+        userDocRef.get()
+            .then(docSnapshot => {
+                if (docSnapshot.exists) {
+                    const userData = docSnapshot.data()
+                    return userData.phoneNumber !== undefined;
+                } else {
+                    userDocRef.set({
+                        'displayName': user.user.displayName,
+                        'email': user.user.email,
+                        'photoURL': user.user.photoURL
+                    })
+                    return false
+                }
+            }).then(isPhoneNumberLinked => {
+                if (!isPhoneNumberLinked) {
+                    this.setState({
+                        isModalVisisble: true,
+                        uid: uid
+                    })
+                } else {
+                    this.saveUserAndNavigateToHome(uid)
+                }
+            });
+    }
+
+    saveUserAndNavigateToHome(uid) {
+        const userDoc = firestore().collection('Users').doc(uid).get()
+            .then(docSnapshot => {
+                if (docSnapshot.exists) {
+                    let userData = docSnapshot.data()
+                    userData["uid"] = uid
+                    this.props.setUser(userData)
+                    this.props.navigation.navigate('Contacts')
+                } else {
+                    console.log("Error occurred!")
+                }
+            });
     }
 
     render() {
-        const { navigation } = this.props;
-
         return (
             <SafeAreaView style={styles.container}>
+                <Modal isVisible={this.state.isModalVisisble}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modelContentTitle}>Link phone number</Text>
+                        <TextInput
+                            keyboardType="phone-pad"
+                            style={styles.input}
+                            onChangeText={text =>
+                                this.setState({
+                                    phoneNumber: text
+                                })
+                            }
+                            value={this.state.phoneNumber}
+                        />
+                        <Button title="Link"
+                            onPress={this.linkPhoneNumber}
+                        />
+                    </View>
+                </Modal>
                 <ScrollView>
                     <TouchableHighlight
-                        onPress={() => this.onGoogleButtonPress().then((user) => {
-                            console.log('Signed in with Google!')
-                            this.props.setUser(user)
-                            navigation.navigate('Contacts')
-                        })}
+                        onPress={() => this.onGoogleButtonPress()}
                         underlayColor="white">
                         <View style={styles.button}>
                             <Icon
@@ -89,7 +173,26 @@ const styles = StyleSheet.create({
         padding: 12,
         fontSize: 20,
         color: 'black'
-    }
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 22,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 4,
+        borderColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    modelContentTitle: {
+        fontSize: 20,
+        marginBottom: 12,
+    },
+    input: {
+        height: 40,
+        margin: 12,
+        width: 280,
+        borderWidth: 1,
+        padding: 10,
+    },
 });
 
 const mapStateToProps = (state) => {
