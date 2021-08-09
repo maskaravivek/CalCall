@@ -1,16 +1,15 @@
 import * as React from 'react';
-import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ContactList from './pages/ContactListPage';
-import ChooseCalendars from './pages/ChooseCalendarsPage';
-import SettingsPage from './pages/SettingsPage';
-import SignInPage from './pages/SignInPage';
+import ContactList from './src/pages/ContactListPage';
+import ChooseCalendars from './src/pages/ChooseCalendarsPage';
+import SettingsPage from './src/pages/SettingsPage';
+import SignInPage from './src/pages/SignInPage';
 import { Provider } from 'react-redux';
-import { store, persistor } from './redux/store';
+import { store, persistor } from './src/redux/store';
 import { PersistGate } from 'redux-persist/integration/react'
 import { Provider as PaperProvider } from 'react-native-paper';
-import { Appbar, Menu } from 'react-native-paper';
+import { Appbar } from 'react-native-paper';
 
 
 const Stack = createNativeStackNavigator();

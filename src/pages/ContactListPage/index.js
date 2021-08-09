@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import {
     PermissionsAndroid,
     Platform,
@@ -16,9 +16,10 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import syncContacts from '../../redux/actions/contactsAction'
 import firestore from '@react-native-firebase/firestore';
+import realm from '../../realm/realm'
+import { UpdateMode } from "realm";
 
-type Props = {};
-class ContactList extends Component<Props> {
+class ContactList extends React.Component {
     constructor(props) {
         super(props);
 
@@ -32,7 +33,14 @@ class ContactList extends Component<Props> {
     async componentDidMount() {
         this.syncContacts()
         this.syncCalendar()
-        this.getSubscribedUserEvents(['4803528702'])
+        this.syncRegisteredContactEvents()
+    }
+
+    syncRegisteredContactEvents() {
+        const contacts = realm.objects("Contact");
+        const registeredContacts = contacts.filtered("uid != null")
+        const uids = registeredContacts.map((contact) => contact.uid);
+        uids.forEach(uid => this.getUserEvents(uid))
     }
 
     async deleteOldEvents() {
@@ -50,29 +58,26 @@ class ContactList extends Component<Props> {
         return batch.commit();
     }
 
-    getSubscribedUserEvents(subscribedList) {
-        firestore().collection('Users')
-            .where('phoneNumber', 'in', subscribedList)
-            .get()
-            .then(querySnapshot => {
-                querySnapshot.forEach((doc) => {
-                    console.log(doc.id, " => ", doc.data());
-                    this.getUserEvents(doc.id)
-                });
-            });
-    }
-
-    getUserEvents(uid) {
+    async getUserEvents(uid) {
         firestore().collection('Users')
             .doc(uid)
             .collection('userEvents')
             .get()
             .then(querySnapshot => {
                 querySnapshot.forEach((doc) => {
-                    console.log(doc.id, " => ", doc.data());
-                    this.getUserEvents(doc.id)
+                    const docData = doc.data();
+                    realm.write(() => {
+                        realm.create("Event", {
+                            _id: doc.id,
+                            uid: uid,
+                            title: docData.title,
+                            availability: docData.availability,
+                            startDate: docData.startDate,
+                            endDate: docData.endDate,
+                        }, UpdateMode.Modified);
+                    });
                 });
-            })
+            }).then(() => console.log("User event synced:", uid))
     }
 
     syncCalendar() {
@@ -151,10 +156,34 @@ class ContactList extends Component<Props> {
                     })
                 this.props.syncContacts(trimmedContacts)
                 this.setState({ loading: false });
+                return trimmedContacts;
             })
             .catch(e => {
                 this.setState({ loading: false });
-            });
+            }).then(contacts => {
+                console.log('contacts', contacts.length)
+                contacts.forEach(contact => {
+                    const phoneNumber = contact.phoneNumbers[0].number.replace(/[^\d]/g, '').slice(-10)
+                    firestore().collection('Users')
+                        .where('phoneNumber', '==', phoneNumber)
+                        .get()
+                        .then(querySnapshot => {
+                            let uid = querySnapshot.size > 0 ? querySnapshot.docs[0].id: null;
+                            realm.write(() => {
+                                realm.create("Contact", {
+                                    recordID: contact.recordID,
+                                    uid: uid,
+                                    thumbnailPath: contact.thumbnailPath,
+                                    givenName: contact.givenName,
+                                    familyName: contact.familyName,
+                                    hasThumbnail: contact.hasThumbnail,
+                                    phoneNumber: contact.phoneNumbers[0].number.replace(/[^\d]/g, '').slice(-10)
+                                }, UpdateMode.Modified);
+                            });
+                        })
+                    
+                })
+            }).then(() => console.log("Contacts synced!"));
 
         Contacts.checkPermission();
     }
