@@ -17,6 +17,9 @@ let store = createStore(persistedReducer, {
     },
     "calendars": {
         "calendars": []
+    },
+    "user": {
+        "user": null
     }
 }, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 let persistor = persistStore(store)

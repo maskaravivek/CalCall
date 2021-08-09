@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ContactList from './pages/ContactListPage';
 import ChooseCalendars from './pages/ChooseCalendarsPage';
 import SettingsPage from './pages/SettingsPage';
+import SignInPage from './pages/SignInPage';
 import { Provider } from 'react-redux';
 import { store, persistor } from './redux/store';
 import { PersistGate } from 'redux-persist/integration/react'
@@ -31,10 +32,11 @@ function App() {
         <PaperProvider>
           <NavigationContainer>
             <Stack.Navigator
-              initialRouteName="Home"
+              initialRouteName="Login"
               screenOptions={{
                 header: (props) => <CustomNavigationBar {...props} />,
               }}>
+              <Stack.Screen name="Login" component={SignInPage} options={{ title: 'Login' }}/>
               <Stack.Screen name="Contacts" component={ContactList} options={{ title: 'Contacts' }}/>
               <Stack.Screen name="Settings" component={SettingsPage} options={{ title: 'Settings', previous: true }}/>
               <Stack.Screen name="Calendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: true }}/>
