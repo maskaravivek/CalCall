@@ -1,26 +1,15 @@
 import React from "react";
 import {
-    View,
     Text,
     SafeAreaView,
     StyleSheet,
-    TextInput,
-    TouchableHighlight
-} from "react-native";
-import { Icon } from 'react-native-elements'
-import auth from '@react-native-firebase/auth';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+    TextInput} from "react-native";
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import setUser from '../../redux/actions/userAction'
 import firestore from '@react-native-firebase/firestore';
-import Modal from 'react-native-modal';
 import { Button } from 'react-native-elements';
 import uuid from 'react-native-uuid';
-
-
-import { ScrollView } from "react-native-gesture-handler";
-
 class LinkPhoneNumberPage extends React.Component {
 
     constructor(props) {

@@ -8,6 +8,7 @@ import LinkPhoneNumberPage from './src/pages/LinkPhoneNumberPage';
 import SettingsPage from './src/pages/SettingsPage';
 import FavoritesPage from './src/pages/FavoritesPage';
 import SignInPage from './src/pages/SignInPage';
+import ContactPage from './src/pages/ContactPage';
 import { Provider } from 'react-redux';
 import { store, persistor } from './src/redux/store';
 import { PersistGate } from 'redux-persist/integration/react'
@@ -31,6 +32,12 @@ function Home() {
         tabBarLabel: 'Contacts',
         tabBarIcon: ({ color }) => (
           <MaterialCommunityIcons name="contacts" color={color} size={26} />
+        ),
+      }} />
+      <Tab.Screen name="Settings" component={SettingsPage} options={{
+        tabBarLabel: 'Settings',
+        tabBarIcon: ({ color }) => (
+          <MaterialCommunityIcons name="cog-outline" color={color} size={26} />
         ),
       }} />
     </Tab.Navigator>
@@ -67,6 +74,7 @@ function App() {
               />
               <Stack.Screen name="Settings" component={SettingsPage} options={{ title: 'Settings', previous: true }} />
               <Stack.Screen name="Calendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: true }} />
+              <Stack.Screen name="Contact" component={ContactPage} options={{ title: 'Contact', previous: true }} />
             </Stack.Navigator>
           </NavigationContainer>
         </PaperProvider>

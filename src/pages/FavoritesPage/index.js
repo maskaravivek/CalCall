@@ -14,6 +14,7 @@ import { bindActionCreators } from 'redux';
 import syncContacts from '../../redux/actions/contactsAction'
 import getAvatarInitials from '../../utils/utils'
 import realm from '../../realm/realm'
+import { Icon, Badge } from 'react-native-elements'
 
 class FavoritesPage extends React.Component {
 
@@ -75,23 +76,33 @@ class FavoritesPage extends React.Component {
                         keyExtractor={item => item.recordID}
                         renderItem={({ item }) => <ListItem
                             leftElement={
-                                <Avatar
-                                    img={
-                                        item.hasThumbnail
-                                            ? { uri: item.thumbnailPath }
-                                            : undefined
-                                    }
-                                    placeholder={getAvatarInitials(
-                                        `${item["givenName"]} ${item["familyName"]}`
-                                    )}
-                                    width={40}
-                                    height={40}
-                                />
+                                <View>
+                                    <Avatar
+                                        img={
+                                            item.hasThumbnail
+                                                ? { uri: item.thumbnailPath }
+                                                : undefined
+                                        }
+                                        placeholder={getAvatarInitials(
+                                            `${item["givenName"]} ${item["familyName"]}`
+                                        )}
+                                        width={40}
+                                        height={40}
+                                    />
+
+                                    <Badge
+                                        status={item["status"] === "AVAILABLE" ? "success" : "error"}
+                                        badgeStyle={styles.statusBadge}
+                                        containerStyle={{ position: 'absolute', top: 3, right: 3 }}
+                                    />
+                                </View>
+
                             }
                             key={item["recordID"]}
                             title={`${item["givenName"]} ${item["familyName"]}`}
                             description={item["statusMessage"]}
-                            onPress={() => this.onPressContact(item["phoneNumber"])}
+                            rightElement={<Icon onPress={() => this.onPressContact(item["phoneNumber"])} name="call"></Icon>}
+                            onPress={() => this.props.navigation.navigate('Contact', item)}
                         />
                         }
                     />) :

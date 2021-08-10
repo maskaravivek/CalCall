@@ -269,10 +269,6 @@ class ContactList extends React.Component {
         Contacts.checkPermission();
     }
 
-    onPressContact(phoneNumber) {
-        Linking.openURL(`tel:${phoneNumber}`)
-    }
-
     onFavoriteContact(recordID) {
         console.log(recordID)
         const contacts = realm.objects("Contact");
@@ -306,7 +302,7 @@ class ContactList extends React.Component {
                         key={item["recordID"]}
                         title={`${item["givenName"]} ${item["familyName"]}`}
                         description={item["statusMessage"]}
-                        onPress={() => this.onPressContact(item["phoneNumber"])}
+                        onPress={() => this.props.navigation.navigate('Contact', item)}
                         onDelete={() => this.onFavoriteContact(item["recordID"])}
                     />
                     }
