@@ -34,6 +34,63 @@ class ContactList extends React.Component {
         this.syncContacts()
         this.syncCalendar()
         this.syncRegisteredContactEvents()
+        this.updateRegisteredUserStatus()
+        this.updateContactListOnUI()
+    }
+
+    updateContactListOnUI() {
+        const contacts = realm.objects("Contact")
+        .map(result => {
+            console.log(result.givenName, result.phoneNumber)
+            return {
+                recordID: result.recordID,
+                uid: result.uid,
+                thumbnailPath: result.thumbnailPath,
+                givenName: result.givenName,
+                familyName: result.familyName,
+                hasThumbnail: result.hasThumbnail,
+                phoneNumber: result.phoneNumber,
+                status: result.status,
+                statusMessage: result.statusMessage
+            }
+        });
+        this.showSortedContacts(contacts)
+    }
+
+    showSortedContacts(contacts) {
+        console.log(contacts.length)
+        contacts.sort((a, b) => {
+            return a.givenName.localeCompare(b.givenName)
+        });
+        this.props.syncContacts(contacts)
+    }
+
+    async updateRegisteredUserStatus() {
+        const events = realm.objects("Event");
+        const filteredEvents = events
+            .filtered(`(startDate > ${Date.now()} && startDate <= ${Date.now() + (100 * 15 * 60000)}) 
+        || (startDate < ${Date.now()} && endDate > ${Date.now()})`)
+
+        let userStatusMap = {}
+        filteredEvents.forEach(event => {
+            if (event.startDate < Date.now() && event.endDate > Date.now()) {
+                userStatusMap[event.uid] = {
+                    "status": "IN_MEETING",
+                    "statusMessage": "In a meeting"
+                }
+            } else if (event.startDate <= (Date.now() + (100 * 15 * 60000))) {
+                if (!(event.uid in userStatusMap)) {
+                    userStatusMap[event.uid] = {
+                        "status": "UPCOMING_MEETING",
+                        "statusMessage": "Has a meeting in 15 minutes"
+                    }
+                }
+            }
+        })
+
+        for (const [uid, value] of Object.entries(userStatusMap)) {
+            this.updateContactStatus(uid, value["status"], value["statusMessage"])
+        }
     }
 
     syncRegisteredContactEvents() {
@@ -56,6 +113,28 @@ class ContactList extends React.Component {
         });
 
         return batch.commit();
+    }
+
+    async getPhoneNumberUidMap() {
+        return firestore().collection('Users')
+            .get()
+            .then(querySnapshot => {
+                let phoneNumberUidMap = {}
+                querySnapshot.forEach((doc) => {
+                    const docData = doc.data();
+                    phoneNumberUidMap[docData.phoneNumber] = doc.id
+                });
+                return phoneNumberUidMap;
+            })
+    }
+
+    updateContactStatus(uid, status, statusMessage) {
+        const contacts = realm.objects("Contact");
+        const matchedContact = contacts.filtered(`uid == '${uid}'`)
+        realm.write(() => {
+            matchedContact[0].status = status
+            matchedContact[0].statusMessage = statusMessage
+        });
     }
 
     async getUserEvents(uid) {
@@ -143,18 +222,17 @@ class ContactList extends React.Component {
         Contacts.getAll()
             .then(contacts => {
                 const trimmedContacts = contacts
-                    .filter(c => c.phoneNumbers.length > 0)
+                    .filter(c => c.phoneNumbers.length > 0 && c.givenName.length > 0)
                     .map(c => {
                         return {
                             "hasThumbnail": c["hasThumbnail"],
                             "thumbnailPath": c["thumbnailPath"],
-                            "givenName": c["givenName"],
-                            "familyName": c["familyName"],
+                            "givenName": c["givenName"] || "",
+                            "familyName": c["familyName"] || "",
                             "recordID": c["recordID"],
                             "phoneNumbers": c["phoneNumbers"],
                         }
                     })
-                this.props.syncContacts(trimmedContacts)
                 this.setState({ loading: false });
                 return trimmedContacts;
             })
@@ -162,13 +240,12 @@ class ContactList extends React.Component {
                 this.setState({ loading: false });
             }).then(contacts => {
                 console.log('contacts', contacts.length)
-                contacts.forEach(contact => {
-                    const phoneNumber = contact.phoneNumbers[0].number.replace(/[^\d]/g, '').slice(-10)
-                    firestore().collection('Users')
-                        .where('phoneNumber', '==', phoneNumber)
-                        .get()
-                        .then(querySnapshot => {
-                            let uid = querySnapshot.size > 0 ? querySnapshot.docs[0].id: null;
+
+                this.getPhoneNumberUidMap()
+                    .then(phoneNumberUidMap => {
+                        contacts.forEach(contact => {
+                            const phoneNumber = contact.phoneNumbers[0].number.replace(/[^\d]/g, '').slice(-10)
+                            let uid = phoneNumberUidMap[phoneNumber];
                             realm.write(() => {
                                 realm.create("Contact", {
                                     recordID: contact.recordID,
@@ -177,19 +254,20 @@ class ContactList extends React.Component {
                                     givenName: contact.givenName,
                                     familyName: contact.familyName,
                                     hasThumbnail: contact.hasThumbnail,
-                                    phoneNumber: contact.phoneNumbers[0].number.replace(/[^\d]/g, '').slice(-10)
+                                    phoneNumber: phoneNumber,
+                                    status: "AVAILABLE",
+                                    statusMessage: "Available"
                                 }, UpdateMode.Modified);
                             });
                         })
-                    
-                })
+                    })
             }).then(() => console.log("Contacts synced!"));
 
         Contacts.checkPermission();
     }
 
-    onPressContact(phoneNumbers) {
-        Linking.openURL(`tel:${phoneNumbers[0].number}`)
+    onPressContact(phoneNumber) {
+        Linking.openURL(`tel:${phoneNumber}`)
     }
 
     render() {
@@ -215,7 +293,8 @@ class ContactList extends React.Component {
                         }
                         key={item["recordID"]}
                         title={`${item["givenName"]} ${item["familyName"]}`}
-                        onPress={() => this.onPressContact(item["phoneNumbers"])}
+                        description={item["statusMessage"] || "Available"}
+                        onPress={() => this.onPressContact(item["phoneNumber"])}
                     />
                     }
                 />
