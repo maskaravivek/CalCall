@@ -27,6 +27,7 @@ class FavoritesPage extends React.Component {
     }
 
     async componentDidMount() {
+        this.updateContactListOnUI()
         this._navListener = this.props.navigation.addListener('focus', () => {
             this.updateContactListOnUI()
         });
@@ -62,7 +63,7 @@ class FavoritesPage extends React.Component {
     }
 
     onPressContact(phoneNumber) {
-        Linking.openURL(`tel:${phoneNumber}`)
+        Linking.openURL(`facetime-audio://+1${phoneNumber}`)
     }
 
     render() {

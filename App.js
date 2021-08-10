@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { Link, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import ContactList from './src/pages/ContactListPage';
 import ChooseCalendars from './src/pages/ChooseCalendarsPage';
+import LinkPhoneNumberPage from './src/pages/LinkPhoneNumberPage';
 import SettingsPage from './src/pages/SettingsPage';
 import FavoritesPage from './src/pages/FavoritesPage';
 import SignInPage from './src/pages/SignInPage';
@@ -53,11 +54,12 @@ function App() {
         <PaperProvider>
           <NavigationContainer>
             <Stack.Navigator
-              initialRouteName="Login"
+              initialRouteName="LinkPhoneNumber"
               screenOptions={{
                 header: (props) => <CustomNavigationBar {...props} />,
               }}>
               <Stack.Screen name="Login" component={SignInPage} options={{ title: 'Login' }} />
+              <Stack.Screen name="LinkPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Link Phone Number' }} />
               <Stack.Screen
                 name="Home"
                 component={Home}
