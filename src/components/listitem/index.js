@@ -42,7 +42,7 @@ class ListItem extends Component {
                     style={[styles.rightAction, { backgroundColor: color }]}
                     onPress={pressHandler}
                 >
-                    <Text style={{ color: "#fff" }}>Delete</Text>
+                    <Text style={{ color: "#fff" }}>Favorite</Text>
                 </RectButton>
             </Animated.View>
         );

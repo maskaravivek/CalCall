@@ -13,10 +13,9 @@ import Avatar from "../../components/avatar";
 import { Linking } from 'react-native'
 import RNCalendarEvents from "react-native-calendar-events";
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import syncContacts from '../../redux/actions/contactsAction'
 import firestore from '@react-native-firebase/firestore';
 import realm from '../../realm/realm'
+import getAvatarInitials from '../../utils/utils'
 import { UpdateMode } from "realm";
 
 class ContactList extends React.Component {
@@ -24,7 +23,8 @@ class ContactList extends React.Component {
         super(props);
 
         this.state = {
-            loading: true
+            loading: true,
+            contacts: []
         };
 
         Contacts.iosEnableNotesUsage(false);
@@ -40,29 +40,30 @@ class ContactList extends React.Component {
 
     updateContactListOnUI() {
         const contacts = realm.objects("Contact")
-        .map(result => {
-            console.log(result.givenName, result.phoneNumber)
-            return {
-                recordID: result.recordID,
-                uid: result.uid,
-                thumbnailPath: result.thumbnailPath,
-                givenName: result.givenName,
-                familyName: result.familyName,
-                hasThumbnail: result.hasThumbnail,
-                phoneNumber: result.phoneNumber,
-                status: result.status,
-                statusMessage: result.statusMessage
-            }
-        });
+            .map(result => {
+                console.log(result.status)
+                return {
+                    recordID: result.recordID,
+                    uid: result.uid,
+                    thumbnailPath: result.thumbnailPath,
+                    givenName: result.givenName,
+                    familyName: result.familyName,
+                    hasThumbnail: result.hasThumbnail,
+                    phoneNumber: result.phoneNumber,
+                    status: result.status,
+                    statusMessage: result.statusMessage
+                }
+            });
         this.showSortedContacts(contacts)
     }
 
     showSortedContacts(contacts) {
-        console.log(contacts.length)
         contacts.sort((a, b) => {
             return a.givenName.localeCompare(b.givenName)
         });
-        this.props.syncContacts(contacts)
+        this.setState({
+            contacts: contacts
+        })
     }
 
     async updateRegisteredUserStatus() {
@@ -89,6 +90,7 @@ class ContactList extends React.Component {
         })
 
         for (const [uid, value] of Object.entries(userStatusMap)) {
+            console.log(uid, value["status"], value["statusMessage"])
             this.updateContactStatus(uid, value["status"], value["statusMessage"])
         }
     }
@@ -256,7 +258,8 @@ class ContactList extends React.Component {
                                     hasThumbnail: contact.hasThumbnail,
                                     phoneNumber: phoneNumber,
                                     status: "AVAILABLE",
-                                    statusMessage: "Available"
+                                    statusMessage: "Available",
+                                    favorite: false
                                 }, UpdateMode.Modified);
                             });
                         })
@@ -270,11 +273,20 @@ class ContactList extends React.Component {
         Linking.openURL(`tel:${phoneNumber}`)
     }
 
+    onFavoriteContact(recordID) {
+        console.log(recordID)
+        const contacts = realm.objects("Contact");
+        const matchedContact = contacts.filtered(`recordID == '${recordID}'`)
+        realm.write(() => {
+            matchedContact[0].favorite = true
+        });
+    }
+
     render() {
         return (
             <SafeAreaView style={styles.container}>
                 <FlatList
-                    data={this.props.contacts.contacts}
+                    data={this.state.contacts}
                     keyExtractor={item => item.recordID}
                     renderItem={({ item }) => <ListItem
                         leftElement={
@@ -293,8 +305,9 @@ class ContactList extends React.Component {
                         }
                         key={item["recordID"]}
                         title={`${item["givenName"]} ${item["familyName"]}`}
-                        description={item["statusMessage"] || "Available"}
+                        description={item["statusMessage"]}
                         onPress={() => this.onPressContact(item["phoneNumber"])}
+                        onDelete={() => this.onFavoriteContact(item["recordID"])}
                     />
                     }
                 />
@@ -316,25 +329,9 @@ const styles = StyleSheet.create({
     },
 });
 
-const getAvatarInitials = textString => {
-    if (!textString) return "";
-    const text = textString.trim();
-    const textSplit = text.split(" ");
-    if (textSplit.length <= 1) return text.charAt(0);
-    const initials =
-        textSplit[0].charAt(0) + textSplit[textSplit.length - 1].charAt(0);
-    return initials;
-};
-
 const mapStateToProps = (state) => {
-    const { contacts, calendars, user } = state
-    return { contacts, calendars, user }
+    const { calendars, user } = state
+    return { calendars, user }
 };
 
-const mapDispatchToProps = dispatch => (
-    bindActionCreators({
-        syncContacts,
-    }, dispatch)
-);
-
-export default connect(mapStateToProps, mapDispatchToProps)(ContactList);
+export default connect(mapStateToProps)(ContactList);

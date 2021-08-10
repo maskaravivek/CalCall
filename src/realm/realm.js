@@ -26,7 +26,8 @@ Contact.schema = {
         hasThumbnail: "bool",
         phoneNumber: "string",
         status: "string",
-        statusMessage: "string"
+        statusMessage: "string",
+        favorite: "bool"
     },
     primaryKey: "recordID",
 };

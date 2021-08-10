@@ -35,7 +35,7 @@ class SignInPage extends React.Component {
     async componentDidMount() {
         this._configureGoogleSignIn();
         if (await GoogleSignin.isSignedIn() && this.props.user.user.phoneNumber !== undefined) {
-            this.props.navigation.navigate('Contacts')
+            this.props.navigation.navigate('Home')
         }
     }
 
@@ -108,7 +108,7 @@ class SignInPage extends React.Component {
                     let userData = docSnapshot.data()
                     userData["uid"] = uid
                     this.props.setUser(userData)
-                    this.props.navigation.navigate('Contacts')
+                    this.props.navigation.navigate('Home')
                 } else {
                     console.log("Error occurred!")
                 }
@@ -142,7 +142,7 @@ class SignInPage extends React.Component {
                         underlayColor="white">
                         <View style={styles.button}>
                             <Icon
-                                name='event' /><Text style={styles.buttonText}>Google Sign In</Text>
+                                name='event' /><Text style={styles.buttonText}>Sign in with google</Text>
                         </View>
                     </TouchableHighlight>
                 </ScrollView>
