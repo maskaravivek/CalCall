@@ -27,7 +27,9 @@ class FavoritesPage extends React.Component {
     }
 
     async componentDidMount() {
-        this.updateContactListOnUI()
+        this._navListener = this.props.navigation.addListener('focus', () => {
+            this.updateContactListOnUI()
+        });
     }
 
     updateContactListOnUI() {
@@ -50,15 +52,10 @@ class FavoritesPage extends React.Component {
         this.showSortedContacts(favoriteContacts)
     }
 
-    componentDidAppear() {
-        this.updateContactListOnUI()
-    }
-
     showSortedContacts(contacts) {
         contacts.sort((a, b) => {
             return a.givenName.localeCompare(b.givenName)
         });
-        console.log('favorites', contacts.length)
         this.setState({
             contacts: contacts
         })

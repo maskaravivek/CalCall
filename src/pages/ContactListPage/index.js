@@ -28,20 +28,20 @@ class ContactList extends React.Component {
         };
 
         Contacts.iosEnableNotesUsage(false);
+        this.showSortedContacts = this.showSortedContacts.bind(this)
     }
 
     async componentDidMount() {
         this.syncContacts()
         this.syncCalendar()
-        this.syncRegisteredContactEvents()
-        this.updateRegisteredUserStatus()
-        this.updateContactListOnUI()
+        await this.syncRegisteredContactEvents()
+        await this.updateRegisteredUserStatus()
+        await this.updateContactListOnUI()
     }
 
-    updateContactListOnUI() {
+    async updateContactListOnUI() {
         const contacts = realm.objects("Contact")
             .map(result => {
-                console.log(result.status)
                 return {
                     recordID: result.recordID,
                     uid: result.uid,
@@ -57,12 +57,13 @@ class ContactList extends React.Component {
         this.showSortedContacts(contacts)
     }
 
-    showSortedContacts(contacts) {
-        contacts.sort((a, b) => {
+    showSortedContacts(allContacts) {
+        allContacts.sort((a, b) => {
             return a.givenName.localeCompare(b.givenName)
         });
+
         this.setState({
-            contacts: contacts
+            contacts: allContacts
         })
     }
 
@@ -90,12 +91,11 @@ class ContactList extends React.Component {
         })
 
         for (const [uid, value] of Object.entries(userStatusMap)) {
-            console.log(uid, value["status"], value["statusMessage"])
             this.updateContactStatus(uid, value["status"], value["statusMessage"])
         }
     }
 
-    syncRegisteredContactEvents() {
+    async syncRegisteredContactEvents() {
         const contacts = realm.objects("Contact");
         const registeredContacts = contacts.filtered("uid != null")
         const uids = registeredContacts.map((contact) => contact.uid);
@@ -133,10 +133,13 @@ class ContactList extends React.Component {
     updateContactStatus(uid, status, statusMessage) {
         const contacts = realm.objects("Contact");
         const matchedContact = contacts.filtered(`uid == '${uid}'`)
-        realm.write(() => {
-            matchedContact[0].status = status
-            matchedContact[0].statusMessage = statusMessage
-        });
+
+        matchedContact.forEach(contact => {
+            realm.write(() => {
+                contact.status = status
+                contact.statusMessage = statusMessage
+            });
+        })
     }
 
     async getUserEvents(uid) {
@@ -256,10 +259,7 @@ class ContactList extends React.Component {
                                     givenName: contact.givenName,
                                     familyName: contact.familyName,
                                     hasThumbnail: contact.hasThumbnail,
-                                    phoneNumber: phoneNumber,
-                                    status: "AVAILABLE",
-                                    statusMessage: "Available",
-                                    favorite: false
+                                    phoneNumber: phoneNumber
                                 }, UpdateMode.Modified);
                             });
                         })

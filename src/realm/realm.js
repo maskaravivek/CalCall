@@ -25,9 +25,9 @@ Contact.schema = {
         familyName: "string",
         hasThumbnail: "bool",
         phoneNumber: "string",
-        status: "string",
-        statusMessage: "string",
-        favorite: "bool"
+        status: {type: "string", default: "AVAILABLE"},
+        statusMessage: {type: "string", default: "Available"},
+        favorite: {type: "bool", default: false}
     },
     primaryKey: "recordID",
 };
