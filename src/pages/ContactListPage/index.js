@@ -5,7 +5,9 @@ import {
     SafeAreaView,
     StyleSheet,
     FlatList,
-    View} from "react-native";
+    RefreshControl,
+    View
+} from "react-native";
 import Contacts from "react-native-contacts";
 
 import ListItem from "../../components/listitem";
@@ -15,7 +17,7 @@ import { connect } from 'react-redux';
 import realm from '../../realm/realm'
 import getAvatarInitials from '../../utils/utils'
 import { deleteOldEvents, syncCalendarEvents, syncRegisteredContactEvents } from '../../tasks/events'
-import { syncDeviceContacts, updateRegisteredUserStatus } from '../../tasks/contacts'
+import { syncDeviceContacts, updateRegisteredUserStatus, getSortedContacts } from '../../tasks/contacts'
 import { Button } from 'react-native-elements';
 
 class ContactList extends React.Component {
@@ -28,53 +30,19 @@ class ContactList extends React.Component {
         };
 
         Contacts.iosEnableNotesUsage(false);
-        this.showSortedContacts = this.showSortedContacts.bind(this)
     }
 
     async componentDidMount() {
         this.syncCalendar()
         await syncRegisteredContactEvents()
         await updateRegisteredUserStatus()
-        await this.updateContactListOnUI()
+        this.updateContactListOnUI()
     }
 
     async updateContactListOnUI() {
-        const contacts = realm.objects("Contact")
-            .map(result => {
-                return {
-                    recordID: result.recordID,
-                    uid: result.uid,
-                    thumbnailPath: result.thumbnailPath,
-                    givenName: result.givenName,
-                    familyName: result.familyName,
-                    hasThumbnail: result.hasThumbnail,
-                    phoneNumber: result.phoneNumber,
-                    status: result.status,
-                    statusMessage: result.statusMessage
-                }
-            });
-        this.showSortedContacts(contacts)
-    }
-
-    showSortedContacts(allContacts) {
-        allContacts.sort((a, b) => {
-            return a.givenName.localeCompare(b.givenName)
-        });
-
+        const allContacts = getSortedContacts()
         this.setState({
             contacts: allContacts
-        })
-    }
-
-    updateContactStatus(uid, status, statusMessage) {
-        const contacts = realm.objects("Contact");
-        const matchedContact = contacts.filtered(`uid == '${uid}'`)
-
-        matchedContact.forEach(contact => {
-            realm.write(() => {
-                contact.status = status
-                contact.statusMessage = statusMessage
-            });
         })
     }
 
@@ -130,41 +98,47 @@ class ContactList extends React.Component {
     render() {
         return (
             <SafeAreaView style={styles.container}>
-                {
-                    this.state.contacts.length > 0 ? (<FlatList
-                        data={this.state.contacts}
-                        keyExtractor={item => item.recordID}
-                        renderItem={({ item }) => <ListItem
-                            leftElement={
-                                <Avatar
-                                    img={
-                                        item.hasThumbnail
-                                            ? { uri: item.thumbnailPath }
-                                            : undefined
-                                    }
-                                    placeholder={getAvatarInitials(
-                                        `${item["givenName"]} ${item["familyName"]}`
-                                    )}
-                                    width={40}
-                                    height={40}
-                                />
-                            }
-                            key={item["recordID"]}
-                            title={`${item["givenName"]} ${item["familyName"]}`}
-                            description={item["statusMessage"]}
-                            onPress={() => this.props.navigation.navigate('Contact', item)}
-                            onDelete={() => this.onFavoriteContact(item["recordID"])}
+                <FlatList
+                    data={this.state.contacts}
+                    keyExtractor={item => item.recordID}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={this.state.loading}
+                            onRefresh={() => this.syncContacts()}
                         />
+                    }
+                    ListEmptyComponent={
+                        <View style={styles.emptyText}>
+                            <Button title="Sync"
+                                loading={this.state.loading}
+                                buttonStyle={styles.button}
+                                onPress={() => this.syncContacts()}
+                            />
+                        </View>
+                    }
+                    renderItem={({ item }) => <ListItem
+                        leftElement={
+                            <Avatar
+                                img={
+                                    item.hasThumbnail
+                                        ? { uri: item.thumbnailPath }
+                                        : undefined
+                                }
+                                placeholder={getAvatarInitials(
+                                    `${item["givenName"]} ${item["familyName"]}`
+                                )}
+                                width={40}
+                                height={40}
+                            />
                         }
-                    />) : <View style={styles.emptyText}>
-                        <Button title="Sync"
-                            loading={this.state.loading}
-                            buttonStyle={styles.button}
-                            onPress={() => this.syncContacts()}
-                        />
-                    </View>
-                }
-
+                        key={item["recordID"]}
+                        title={`${item["givenName"]} ${item["familyName"]}`}
+                        description={item["statusMessage"]}
+                        onPress={() => this.props.navigation.navigate('Contact', item)}
+                        onDelete={() => this.onFavoriteContact(item["recordID"])}
+                    />
+                    }
+                />
             </SafeAreaView>
         );
     }
@@ -184,6 +158,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         justifyContent: 'center',
         flex: 1,
+        marginTop: 200,
         alignItems: 'center'
     },
     button: {

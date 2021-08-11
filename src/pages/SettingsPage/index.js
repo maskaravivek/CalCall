@@ -9,43 +9,8 @@ import {
 import { Icon } from 'react-native-elements'
 
 import { ScrollView } from "react-native-gesture-handler";
-import { syncDeviceContacts } from '../../tasks/contacts'
-import { useToast } from "react-native-toast-notifications";
 
 export default function SettingsPage({ navigation }) {
-    const toast = useToast();
-
-    const syncContacts = () => {
-        console.log("Syncing...")
-        if (Platform.OS === "android") {
-            console.log("ask permission dialog")
-            PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
-                title: "Contacts",
-                message: "This app would like to view your contacts."
-            }).then(() => {
-                loadContacts();
-            });
-        } else {
-            loadContacts();
-        }
-    }
-
-    const loadContacts = () => {
-        console.log("Syncing...")
-        const id = toast.show("Syncing...", {
-            placement: "bottom",
-            offset: 30,
-            animationType: "zoom-in",
-            duration: 1000
-        })
-        syncDeviceContacts().then(() => {
-            console.log("Contacts synced!")
-            toast.update(id, "Synced successfully!", {
-                type: "success"
-            })
-        })
-    }
-
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
@@ -59,12 +24,6 @@ export default function SettingsPage({ navigation }) {
                     <View style={styles.button}>
                         <Icon
                             name='event' color='#FF8E9E' /><Text style={styles.buttonText}>Select Calendars</Text>
-                    </View>
-                </TouchableHighlight>
-                <TouchableHighlight onPress={() => syncContacts()} underlayColor="white">
-                    <View style={styles.button}>
-                        <Icon
-                            name='sync' color='#FF8E9E' /><Text style={styles.buttonText}>Sync Contacts</Text>
                     </View>
                 </TouchableHighlight>
             </ScrollView>

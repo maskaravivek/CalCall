@@ -93,7 +93,29 @@ function updateContactStatus(uid, status, statusMessage) {
     })
 }
 
+function getSortedContacts() {
+    return realm.objects("Contact")
+        .map(result => {
+            return {
+                recordID: result.recordID,
+                uid: result.uid,
+                thumbnailPath: result.thumbnailPath,
+                givenName: result.givenName,
+                familyName: result.familyName,
+                hasThumbnail: result.hasThumbnail,
+                phoneNumber: result.phoneNumber,
+                status: result.status,
+                statusMessage: result.statusMessage
+            }
+        }).sort(sortContacts)
+}
+
+function sortContacts(a, b) {
+    return a.givenName.localeCompare(b.givenName)
+}
+
 export {
     updateRegisteredUserStatus,
-    syncDeviceContacts
+    syncDeviceContacts,
+    getSortedContacts
 }
