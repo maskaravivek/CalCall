@@ -17,7 +17,7 @@ export default function SettingsPage({ navigation }) {
                 <TouchableHighlight onPress={() => navigation.navigate('Calendars')} underlayColor="white">
                     <View style={styles.button}>
                         <Icon
-                            name='event' /><Text style={styles.buttonText}>Select Calendars</Text>
+                            name='event' color='#FF8E9E' /><Text style={styles.buttonText}>Select Calendars</Text>
                     </View>
                 </TouchableHighlight>
             </ScrollView>
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     button: {
         padding: 12,
         flex: 1,
-        flexDirection: 'row', 
+        flexDirection: 'row',
         alignItems: 'center',
     },
     buttonText: {

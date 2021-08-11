@@ -9,12 +9,10 @@ import {
 import RNCalendarEvents from "react-native-calendar-events";
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import setCalendars from '../../redux/actions/calendarAction'
-import CheckBox from 'react-native-check-box'
+import { setCalendars } from '../../redux/actions/calendarAction'
+import { CheckBox, Button } from 'react-native-elements';
 
-type Props = {};
-
-class ChooseCalendars extends Component<Props> {
+class ChooseCalendars extends React.Component {
     constructor(props) {
         super(props);
 
@@ -24,35 +22,45 @@ class ChooseCalendars extends Component<Props> {
     }
 
     async componentDidMount() {
-        this.syncCalendar()
+        this.checkPermissionsAndSyncCalendar()
     }
 
-    syncCalendar() {
+    checkPermissionsAndSyncCalendar() {
         RNCalendarEvents.checkPermissions(readOnly = true)
             .then(result => {
                 if (result === "authorized") {
-                    RNCalendarEvents.findCalendars().then(calendars => {
-
-                        let allCalendars = calendars.map(c => {
-                            return {
-                                "id": c["id"],
-                                "title": c["title"],
-                                "selected": this.props.calendars.calendars.some((cal) => cal["id"] === c["id"] && cal["selected"])
-                            }
-                        })
-                        // console.log(allCalendars)
-                        this.setState({ loading: false });
-                        this.props.setCalendars(allCalendars);
-                    });
+                    this.fetchCalendars();
                 } else {
-                    RNCalendarEvents.requestPermissions(readOnly = true);
+                    RNCalendarEvents.requestPermissions(readOnly = true).then(result => {
+                        if (result === "authorized") {
+                            this.fetchCalendars();
+                        } else {
+                            console.log("Permission denied", result)
+                        }
+                    });
                 }
             });
     }
 
+    fetchCalendars() {
+        RNCalendarEvents.findCalendars().then(calendars => {
+
+            let allCalendars = calendars.map(c => {
+                return {
+                    "id": c["id"],
+                    "title": c["title"],
+                    "selected": this.props.calendars.calendars.some((cal) => cal["id"] === c["id"] && cal["selected"])
+                };
+            });
+            // console.log(allCalendars)
+            this.setState({ loading: false });
+            this.props.setCalendars(allCalendars);
+        });
+    }
+
     updateSavedCalendars(id, isSelected) {
         const idx = this.props.calendars.calendars.findIndex((c => c.id == id));
-        
+
         let calendars = this.props.calendars.calendars
         calendars[idx].selected = !isSelected
         this.props.setCalendars(calendars)
@@ -64,14 +72,17 @@ class ChooseCalendars extends Component<Props> {
                 <FlatList
                     data={this.props.calendars.calendars}
                     keyExtractor={item => item.id}
-                    renderItem={({ item }) => <View style={styles.item}>
-                        <CheckBox isChecked={item.selected}
-                            onClick={() => this.updateSavedCalendars(item.id, item.selected)}
-                            rightText={item.title} />
-                    </View>
+                    renderItem={({ item }) => <CheckBox checkedColor="#FF8E9E"
+                        containerStyle={styles.checkboxContainerStyle}
+                        checked={item.selected}
+                        onPress={() => this.updateSavedCalendars(item.id, item.selected)}
+                        title={item.title} />
                     }
                 />
-
+                {this.props.route.params && this.props.route.params.onboarding && <Button title="Next"
+                    buttonStyle={styles.button}
+                    onPress={() => this.props.navigation.navigate('Home')}
+                />}
             </SafeAreaView>
         );
     }
@@ -80,15 +91,25 @@ class ChooseCalendars extends Component<Props> {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: 22
-    },
-    item: {
-        padding: 10,
-        fontSize: 18,
-        height: 44,
+        paddingTop: 22,
     },
     title: {
         fontSize: 32,
+    },
+    checkboxContainerStyle: {
+        backgroundColor: '#00000000',
+        flexDirection: 'row',
+        alignItems: "flex-start",
+        alignSelf: "flex-start",
+        marginLeft: 24,
+    },
+    button: {
+        width: 300,
+        marginTop: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: "center",
+        backgroundColor: '#FF8E9E',
     },
 });
 

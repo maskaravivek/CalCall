@@ -102,6 +102,16 @@ class ContactList extends React.Component {
         uids.forEach(uid => this.getUserEvents(uid))
     }
 
+    async deleteContacts() {
+        const contacts = realm.objects("Contact");
+        const contactsWithoutThumbnail = contacts.filtered("hasThumbnail == false")
+        contactsWithoutThumbnail.forEach(contact => {
+            realm.write(() => {
+                realm.delete(contact);
+            });
+        })
+    }
+
     async deleteOldEvents() {
         const usersQuerySnapshot = await firestore().collection('Users')
             .doc(this.props.user.user.uid)

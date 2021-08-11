@@ -67,31 +67,31 @@ class ContactPage extends React.Component {
                         });
                     }}>
                         <View style={styles.cardView}>
-                            <Icon name="chatbubble-outline" type='ionicon'></Icon>
+                            <Icon name="chatbubble-outline" color='#FF8E9E' type='ionicon'></Icon>
                             <Text style={styles.cardText}>Message</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => Linking.openURL(`tel://${item["phoneNumber"]}`)}>
                         <View style={styles.cardView}>
-                            <Icon name="call-outline" type='ionicon'></Icon>
+                            <Icon name="call-outline" color='#FF8E9E' type='ionicon'></Icon>
                             <Text style={styles.cardText}>Call</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => Linking.openURL(`whatsapp://send?phone=+1${item["phoneNumber"]}`)}>
                         <View style={styles.cardView}>
-                            <Icon name="logo-whatsapp" type='ionicon'></Icon>
+                            <Icon name="logo-whatsapp" color='#FF8E9E' type='ionicon'></Icon>
                             <Text style={styles.cardText}>WhatsApp</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => Linking.openURL(`facetime://${item["phoneNumber"]}`)}>
                         <View style={styles.cardView}>
-                            <Icon name="videocam-outline" type='ionicon'></Icon>
+                            <Icon name="videocam-outline" color='#FF8E9E' type='ionicon'></Icon>
                             <Text style={styles.cardText}>Facetime</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => Linking.openURL(`facetime-audio://${item["phoneNumber"]}`)}>
                         <View style={styles.cardView}>
-                            <Icon name="mic-outline" type='ionicon'></Icon>
+                            <Icon name="mic-outline" color='#FF8E9E' type='ionicon'></Icon>
                             <Text style={styles.cardText}>FT Audio</Text>
                         </View>
                     </TouchableOpacity>
@@ -146,13 +146,15 @@ const styles = StyleSheet.create({
     cardText: {
         marginTop: 8,
         fontSize: 8,
-        textAlign: "center"
+        textAlign: "center",
+        color: '#EA5B70'
     },
     cardView: {
         width: 60,
         height: 60,
         backgroundColor: "white",
         borderWidth: 1,
+        borderColor: '#FF8E9E',
         borderRadius: 5,
         padding: 8,
         margin: 4,
@@ -163,12 +165,14 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
     },
     fullCardView: {
-        height: 60,
+        height: 72,
         width: "90%",
         backgroundColor: "white",
         borderWidth: 1,
         borderRadius: 5,
+        borderColor: '#FF8E9E',
         padding: 8,
+        paddingBottom: 16,
         margin: 12,
         marginTop: 48,
         elevation: 4,
@@ -189,13 +193,16 @@ const styles = StyleSheet.create({
         alignItems: "flex-start",
         alignSelf: "flex-start",
         marginBottom: 4,
+        marginLeft: 4,
     },
     mobileNumber: {
         fontSize: 16,
-        color: "blue",
+        color: "#EA5B70",
         textAlign: "left",
         alignItems: "flex-start",
         alignSelf: "flex-start",
+        marginTop: 8,
+        marginLeft: 4,
         marginBottom: 4,
     },
     input: {

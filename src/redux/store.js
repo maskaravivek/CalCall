@@ -16,7 +16,9 @@ let store = createStore(persistedReducer, {
         "contacts": []
     },
     "calendars": {
-        "calendars": []
+        "calendars": [],
+        syncEventTitle: true,
+    shareWithContacts: true,
     },
     "user": {
         "user": null

@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { Link, NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import ContactList from './src/pages/ContactListPage';
 import ChooseCalendars from './src/pages/ChooseCalendarsPage';
 import LinkPhoneNumberPage from './src/pages/LinkPhoneNumberPage';
+import LinkCalendarsPage from './src/pages/LinkCalendarsPage';
 import SettingsPage from './src/pages/SettingsPage';
 import FavoritesPage from './src/pages/FavoritesPage';
 import SignInPage from './src/pages/SignInPage';
@@ -16,12 +17,17 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { Appbar } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
+import { StyleSheet } from "react-native";
+
 const Tab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function Home() {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      activeColor="white"
+      inactiveColor="#E0E0E0"
+      barStyle={{ backgroundColor: '#EA5B70' }}>
       <Tab.Screen name="Favorites" component={FavoritesPage} options={{
         tabBarLabel: 'Favorites',
         tabBarIcon: ({ color }) => (
@@ -46,10 +52,10 @@ function Home() {
 
 function CustomNavigationBar({ navigation, options }) {
   return (
-    <Appbar.Header>
+    <Appbar.Header dark={true} style={styles.appbar}>
       {options.previous ? <Appbar.BackAction onPress={navigation.goBack} /> : null}
-      <Appbar.Content title={options.title} />
-      {!options.previous && <Appbar.Action icon="cog-outline" onPress={() => navigation.navigate("Settings")} />}
+      <Appbar.Content titleStyle={styles.appbarTitle} title={options.title} />
+      {options.settings && <Appbar.Action icon="cog-outline" onPress={() => navigation.navigate("Settings")} />}
     </Appbar.Header>
   );
 }
@@ -65,16 +71,17 @@ function App() {
               screenOptions={{
                 header: (props) => <CustomNavigationBar {...props} />,
               }}>
-              <Stack.Screen name="Login" component={SignInPage} options={{ title: 'Login' }} />
-              <Stack.Screen name="LinkPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Link Phone Number' }} />
+              <Stack.Screen name="Login" component={SignInPage} options={{ title: 'Login', settings: false }} />
+              <Stack.Screen name="LinkPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Link Phone Number', settings: false }} />
+              <Stack.Screen name="ConfigureCalendar" component={LinkCalendarsPage} options={{ title: 'Configure Calendar', settings: false }} />
               <Stack.Screen
                 name="Home"
                 component={Home}
                 options={{ headerShown: false }}
               />
-              <Stack.Screen name="Settings" component={SettingsPage} options={{ title: 'Settings', previous: true }} />
-              <Stack.Screen name="Calendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: true }} />
-              <Stack.Screen name="Contact" component={ContactPage} options={{ title: 'Contact', previous: true }} />
+              <Stack.Screen name="Settings" component={SettingsPage} options={{ title: 'Settings', previous: true, settings: false }} />
+              <Stack.Screen name="Calendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: false, settings: false }} />
+              <Stack.Screen name="Contact" component={ContactPage} options={{ title: 'Contact', previous: true, settings: false }} />
             </Stack.Navigator>
           </NavigationContainer>
         </PaperProvider>
@@ -83,5 +90,14 @@ function App() {
     </Provider>
   );
 }
+
+const styles = StyleSheet.create({
+  appbar: {
+    backgroundColor: '#EA5B70',
+  },
+  appbarTitle: {
+    fontWeight: 'bold'
+  }
+});
 
 export default App;
