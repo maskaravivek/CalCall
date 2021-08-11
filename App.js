@@ -16,6 +16,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Appbar } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { ToastProvider } from 'react-native-toast-notifications'
 
 import { StyleSheet } from "react-native";
 
@@ -72,37 +73,36 @@ const AppWrapper = () => {
 
 const App = () => {
   const user = useSelector((state) => state.user)
-  console.log('user', user)
-
   return (
-    <PaperProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            header: (props) => <CustomNavigationBar {...props} />,
-          }}>
-          {
-            user.isSignedIn ? (<>
-              {console.log('sign in block')}
-              <Stack.Screen
-                name="Home"
-                component={Home}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen name="Settings" component={SettingsPage} options={{ title: 'Settings', previous: true, settings: false }} />
-              <Stack.Screen name="Contact" component={ContactPage} options={{ title: 'Contact', previous: true, settings: false }} />
-              <Stack.Screen name="EditCalendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: true, settings: false }} />
-              <Stack.Screen name="EditPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Edit Phone Number', previous: true, settings: false }} />
-            </>) : (<>
-              <Stack.Screen name="LinkPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Link Phone Number', settings: false }} />
-              <Stack.Screen name="ConfigureCalendar" component={LinkCalendarsPage} options={{ title: 'Configure Calendar', settings: false }} />
-              <Stack.Screen name="Calendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: false, settings: false }} />
-            </>)
-          }
+    <ToastProvider>
+      <PaperProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
+              header: (props) => <CustomNavigationBar {...props} />,
+            }}>
+            {
+              user.isSignedIn ? (<>
+                <Stack.Screen
+                  name="Home"
+                  component={Home}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen name="Settings" component={SettingsPage} options={{ title: 'Settings', previous: true, settings: false }} />
+                <Stack.Screen name="Contact" component={ContactPage} options={{ title: 'Contact', previous: true, settings: false }} />
+                <Stack.Screen name="EditCalendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: true, settings: false }} />
+                <Stack.Screen name="EditPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Edit Phone Number', previous: true, settings: false }} />
+              </>) : (<>
+                <Stack.Screen name="LinkPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Link Phone Number', settings: false }} />
+                <Stack.Screen name="ConfigureCalendar" component={LinkCalendarsPage} options={{ title: 'Configure Calendar', settings: false }} />
+                <Stack.Screen name="Calendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: false, settings: false }} />
+              </>)
+            }
 
-        </Stack.Navigator>
-      </NavigationContainer>
-    </PaperProvider>
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
+    </ToastProvider>
 
   );
 }

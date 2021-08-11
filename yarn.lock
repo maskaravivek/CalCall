@@ -6322,6 +6322,11 @@ react-native-sms@^1.11.0:
   resolved "https://registry.yarnpkg.com/react-native-sms/-/react-native-sms-1.11.0.tgz#02e191ef35fae163d7fae1f78f42f202c33f8c9e"
   integrity sha512-G5q61qGknNyftN1cFkXfH46UkQWMf3fy/M1fxK/QJzLDJAgCSeBqge62FgJClw1FqzYGSjZeoZvkgpWGDCd3wQ==
 
+react-native-toast-notifications@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-toast-notifications/-/react-native-toast-notifications-3.1.0.tgz#6bda47491470d16bbca3c629f26e5127168dfcb8"
+  integrity sha512-IIvXeJUhCF5iCum0P0en/rl2tz8oJKGqy9rvvzncTaYCBd/xFcLlnf668VRaRfy4Rr7wNDt1FkvFBB3iZd03Lw==
+
 react-native-uuid@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/react-native-uuid/-/react-native-uuid-2.0.1.tgz#ed4e2dfb1683eddb66967eb5dca140dfe1abddb9"
