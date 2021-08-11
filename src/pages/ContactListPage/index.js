@@ -15,7 +15,7 @@ import Avatar from "../../components/avatar";
 import RNCalendarEvents from "react-native-calendar-events";
 import { connect } from 'react-redux';
 import realm from '../../realm/realm'
-import getAvatarInitials from '../../utils/utils'
+import { getAvatarInitials, getDescriptionElement } from '../../utils/utils'
 import { deleteOldEvents, syncCalendarEvents, syncRegisteredContactEvents } from '../../tasks/events'
 import { syncDeviceContacts, updateRegisteredUserStatus, getSortedContacts } from '../../tasks/contacts'
 import { Button } from 'react-native-elements';
@@ -119,11 +119,6 @@ class ContactList extends React.Component {
                     renderItem={({ item }) => <ListItem
                         leftElement={
                             <Avatar
-                                img={
-                                    item.hasThumbnail
-                                        ? { uri: item.thumbnailPath }
-                                        : undefined
-                                }
                                 placeholder={getAvatarInitials(
                                     `${item["givenName"]} ${item["familyName"]}`
                                 )}
@@ -133,7 +128,6 @@ class ContactList extends React.Component {
                         }
                         key={item["recordID"]}
                         title={`${item["givenName"]} ${item["familyName"]}`}
-                        description={item["statusMessage"]}
                         onPress={() => this.props.navigation.navigate('Contact', item)}
                         onDelete={() => this.onFavoriteContact(item["recordID"])}
                     />

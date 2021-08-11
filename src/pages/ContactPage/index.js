@@ -3,7 +3,6 @@ import {
     Text,
     SafeAreaView,
     StyleSheet,
-    TextInput,
     View,
     TouchableOpacity
 } from "react-native";
@@ -11,9 +10,9 @@ import { Linking } from 'react-native'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import setUser from '../../redux/actions/userAction'
-import { Card, Button, Icon, Badge } from 'react-native-elements';
+import { Icon, Badge } from 'react-native-elements';
 import Avatar from "../../components/avatar";
-import getAvatarInitials from '../../utils/utils'
+import { getAvatarInitials, getDescriptionElement } from '../../utils/utils'
 import SendSMS from 'react-native-sms'
 
 class ContactPage extends React.Component {
@@ -37,11 +36,6 @@ class ContactPage extends React.Component {
             <SafeAreaView style={styles.container}>
                 <View>
                     <Avatar
-                        img={
-                            item.hasThumbnail
-                                ? { uri: item.thumbnailPath }
-                                : undefined
-                        }
                         placeholder={getAvatarInitials(
                             `${item["givenName"]} ${item["familyName"]}`
                         )}
@@ -56,7 +50,9 @@ class ContactPage extends React.Component {
                     />
                 </View>
                 <Text style={styles.title}>{`${item.givenName} ${item.familyName}`}</Text>
-                <Text style={styles.subtitle}>{`${item.statusMessage}`}</Text>
+                {
+                    getDescriptionElement(item["status"], item["statusMessage"])
+                }
                 <View style={styles.cards}>
                     <TouchableOpacity onPress={() => {
                         SendSMS.send({
@@ -77,7 +73,7 @@ class ContactPage extends React.Component {
                             <Text style={styles.cardText}>Call</Text>
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => Linking.openURL(`whatsapp://send?phone=+1${item["phoneNumber"]}`)}>
+                    <TouchableOpacity onPress={() => Linking.openURL(`whatsapp://send?phone=${item["phoneNumber"]}`)}>
                         <View style={styles.cardView}>
                             <Icon name="logo-whatsapp" color='#FF8E9E' type='ionicon'></Icon>
                             <Text style={styles.cardText}>WhatsApp</Text>

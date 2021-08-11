@@ -10,12 +10,13 @@ import {
 import PropTypes from "prop-types";
 import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
+import { Icon } from 'react-native-elements';
 
 class ListItem extends Component {
     static propTypes = {
         leftElement: PropTypes.element,
         title: PropTypes.string,
-        description: PropTypes.string,
+        description: PropTypes.element,
         rightElement: PropTypes.element,
         rightText: PropTypes.string,
         onPress: PropTypes.func,
@@ -42,7 +43,7 @@ class ListItem extends Component {
                     style={[styles.rightAction, { backgroundColor: color }]}
                     onPress={pressHandler}
                 >
-                    <Text style={{ color: "#fff" }}>Favorite</Text>
+                    <Icon name={iconName} type='ionicon' color='#FF8E9E'></Icon>
                 </RectButton>
             </Animated.View>
         );
@@ -50,13 +51,13 @@ class ListItem extends Component {
 
     renderRightActions = progress => (
         <View style={{ width: 64, flexDirection: "row" }}>
-            {this.renderRightAction("trash", "#ef5350", 64, progress)}
+            {this.renderRightAction("heart", "#ef5350", 64, progress)}
         </View>
     );
 
     renderRightActions = progress => (
         <View style={{ width: 64, flexDirection: "row" }}>
-            {this.renderRightAction("trash", "#ef5350", 64, progress)}
+            {this.renderRightAction("heart", "#ef5350", 64, progress)}
         </View>
     );
 
@@ -115,15 +116,11 @@ class ListItem extends Component {
                             <View style={mainTitleContainer}>
                                 <Text style={titleStyle}>{title}</Text>
                                 {description ? (
-                                    <Text style={descriptionStyle}>{description}</Text>
+                                    <View style={descriptionStyle}>{description}</View>
                                 ) : (
                                     <View />
                                 )}
                             </View>
-                            <View style={rightTextContainer}>
-                                {rightText ? <Text>{rightText}</Text> : <View />}
-                            </View>
-
                             {rightElement ? (
                                 <View style={rightElementContainer}>{rightElement}</View>
                             ) : (
@@ -159,7 +156,8 @@ const styles = StyleSheet.create({
     mainTitleContainer: {
         justifyContent: "center",
         flexDirection: "column",
-        flex: 1
+        flex: 1,
+        width: 300
     },
     rightElementContainer: {
         justifyContent: "center",
@@ -174,8 +172,7 @@ const styles = StyleSheet.create({
         fontSize: 16
     },
     descriptionStyle: {
-        fontSize: 14,
-        color: "#515151"
+        width: 300
     },
     rightAction: {
         alignItems: "center",

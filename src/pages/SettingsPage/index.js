@@ -11,6 +11,7 @@ import { Icon } from 'react-native-elements'
 import { ScrollView } from "react-native-gesture-handler";
 
 export default function SettingsPage({ navigation }) {
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>

@@ -64,13 +64,13 @@ async function updateRegisteredUserStatus() {
         if (event.startDate < Date.now() && event.endDate > Date.now()) {
             userStatusMap[event.uid] = {
                 "status": "IN_MEETING",
-                "statusMessage": "In a meeting"
+                "statusMessage": `${event.endDate}`
             }
         } else if (event.startDate <= (Date.now() + (100 * 15 * 60000))) {
             if (!(event.uid in userStatusMap)) {
                 userStatusMap[event.uid] = {
                     "status": "UPCOMING_MEETING",
-                    "statusMessage": "Has a meeting in 15 minutes"
+                    "statusMessage": `${event.startDate}`
                 }
             }
         }

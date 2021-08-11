@@ -12,7 +12,7 @@ import { Linking } from 'react-native'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import syncContacts from '../../redux/actions/contactsAction'
-import getAvatarInitials from '../../utils/utils'
+import { getAvatarInitials, getDescriptionElement } from '../../utils/utils'
 import realm from '../../realm/realm'
 import { Icon, Badge } from 'react-native-elements'
 
@@ -78,11 +78,6 @@ class FavoritesPage extends React.Component {
                             leftElement={
                                 <View>
                                     <Avatar
-                                        img={
-                                            item.hasThumbnail
-                                                ? { uri: item.thumbnailPath }
-                                                : undefined
-                                        }
                                         placeholder={getAvatarInitials(
                                             `${item["givenName"]} ${item["familyName"]}`
                                         )}
@@ -100,7 +95,7 @@ class FavoritesPage extends React.Component {
                             }
                             key={item["recordID"]}
                             title={`${item["givenName"]} ${item["familyName"]}`}
-                            description={item["statusMessage"]}
+                            description={getDescriptionElement(item["status"], item["statusMessage"])}
                             rightElement={<Icon onPress={() => this.onPressContact(item["phoneNumber"])} name="call"></Icon>}
                             onPress={() => this.props.navigation.navigate('Contact', item)}
                         />
