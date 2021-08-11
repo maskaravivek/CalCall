@@ -114,7 +114,7 @@ class ContactList extends React.Component {
 
     async deleteOldEvents() {
         const usersQuerySnapshot = await firestore().collection('Users')
-            .doc(this.props.user.user.uid)
+            .doc(this.props.user.uid)
             .collection('userEvents')
             .where('endDate', '<', Date.now())
             .get()
@@ -207,7 +207,7 @@ class ContactList extends React.Component {
 
     saveEvent(eventId, event) {
         firestore().collection('Users')
-            .doc(this.props.user.user.uid)
+            .doc(this.props.user.uid)
             .collection('userEvents')
             .doc(eventId)
             .set(event);

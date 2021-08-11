@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import setUser from '../../redux/actions/userAction'
+import { setUserUid, setUserPhoneNumber } from '../../redux/actions/userAction'
 import firestore from '@react-native-firebase/firestore';
 import { Button } from 'react-native-elements';
 import uuid from 'react-native-uuid';
@@ -23,23 +23,25 @@ class LinkPhoneNumberPage extends React.Component {
     }
 
     async componentDidMount() {
-        if (this.props.user.user !== null) {
-            this.props.navigation.navigate('ConfigureCalendar')
+        if (this.props.user.uid == null) {
+            const uid = uuid.v4();
+            this.props.setUserUid(uid)
+        }
+        if (this.props.user.phoneNumber !== null) {
+            this.setState({
+                phoneNumber: this.props.user.phoneNumber
+            })
         }
     }
 
     linkPhoneNumber() {
-        const uid = uuid.v4();
         firestore().collection('Users')
-            .doc(uid)
+            .doc(this.props.user.uid)
             .set({
                 phoneNumber: this.state.phoneNumber
             }).then(() => {
                 console.log('Phone Number linked!');
-                this.props.setUser({
-                    "uid": uid,
-                    "phoneNumber": this.state.phoneNumber
-                })
+                this.props.setUserPhoneNumber(this.state.phoneNumber)
                 this.props.navigation.navigate('ConfigureCalendar')
             });
     }
@@ -126,7 +128,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => (
     bindActionCreators({
-        setUser,
+        setUserUid,
+        setUserPhoneNumber
     }, dispatch)
 );
 

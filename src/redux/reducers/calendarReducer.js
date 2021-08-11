@@ -1,11 +1,11 @@
-const INITIAL_STATE = {
+const CALENDAR_INITIAL_STATE = {
     calendars: [],
     syncEventTitle: true,
     shareWithContacts: true,
 };
 
 
-export default calendarsReducer = (state = INITIAL_STATE, action) => {
+function calendarsReducer(state = CALENDAR_INITIAL_STATE, action) {
     switch (action.type) {
         case "SET_CALENDARS":
             return {
@@ -26,3 +26,8 @@ export default calendarsReducer = (state = INITIAL_STATE, action) => {
             return state
     }
 };
+
+export {
+    CALENDAR_INITIAL_STATE,
+    calendarsReducer
+}

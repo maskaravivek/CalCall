@@ -10,6 +10,7 @@ import RNCalendarEvents from "react-native-calendar-events";
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { setCalendars } from '../../redux/actions/calendarAction'
+import { setIsSignedIn } from '../../redux/actions/userAction'
 import { CheckBox, Button } from 'react-native-elements';
 
 class ChooseCalendars extends React.Component {
@@ -52,7 +53,6 @@ class ChooseCalendars extends React.Component {
                     "selected": this.props.calendars.calendars.some((cal) => cal["id"] === c["id"] && cal["selected"])
                 };
             });
-            // console.log(allCalendars)
             this.setState({ loading: false });
             this.props.setCalendars(allCalendars);
         });
@@ -81,7 +81,10 @@ class ChooseCalendars extends React.Component {
                 />
                 {this.props.route.params && this.props.route.params.onboarding && <Button title="Next"
                     buttonStyle={styles.button}
-                    onPress={() => this.props.navigation.navigate('Home')}
+                    onPress={() => {
+                        this.props.setIsSignedIn(true)
+                        console.log(this.props.user)
+                    }}
                 />}
             </SafeAreaView>
         );
@@ -99,6 +102,7 @@ const styles = StyleSheet.create({
     checkboxContainerStyle: {
         backgroundColor: '#00000000',
         flexDirection: 'row',
+        borderWidth: 0,
         alignItems: "flex-start",
         alignSelf: "flex-start",
         marginLeft: 24,
@@ -114,13 +118,14 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
-    const { calendars } = state
-    return { calendars }
+    const { calendars, user } = state
+    return { calendars, user }
 };
 
 const mapDispatchToProps = dispatch => (
     bindActionCreators({
         setCalendars,
+        setIsSignedIn,
     }, dispatch)
 );
 

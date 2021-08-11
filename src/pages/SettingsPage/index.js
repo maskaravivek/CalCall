@@ -14,7 +14,13 @@ export default function SettingsPage({ navigation }) {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
-                <TouchableHighlight onPress={() => navigation.navigate('Calendars')} underlayColor="white">
+                <TouchableHighlight onPress={() => navigation.navigate('EditPhoneNumber')} underlayColor="white">
+                    <View style={styles.button}>
+                        <Icon
+                            name='settings' color='#FF8E9E' /><Text style={styles.buttonText}>Change Phone Number</Text>
+                    </View>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={() => navigation.navigate('EditCalendars')} underlayColor="white">
                     <View style={styles.button}>
                         <Icon
                             name='event' color='#FF8E9E' /><Text style={styles.buttonText}>Select Calendars</Text>

@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { setSyncEventTitle, setShareWithContacts } from '../../redux/actions/calendarAction'
 import { Button, CheckBox } from 'react-native-elements';
+import { setIsSignedIn } from '../../redux/actions/userAction'
 
 class LinkCalendarsPage extends React.Component {
 
@@ -36,14 +37,23 @@ class LinkCalendarsPage extends React.Component {
                     title="Sync event title" />
                 <CheckBox checkedColor="#FF8E9E" containerStyle={styles.checkboxContainerStyle} checked={this.props.calendars.shareWithContacts}
                     onPress={() => {
+                        if (this.props.calendars.shareWithContacts) { //disabling
+                            this.props.setSyncEventTitle(false)
+                        }
                         this.props.setShareWithContacts(!this.props.calendars.shareWithContacts)
                     }}
                     title="Share with contacts" />
                 <Button title="Next"
                     buttonStyle={styles.button}
-                    onPress={() => this.props.navigation.navigate('Calendars', {
-                        onboarding: true
-                    })}
+                    onPress={() => {
+                        if (this.props.calendars.shareWithContacts) {
+                            this.props.navigation.navigate('Calendars', {
+                                onboarding: true
+                            })
+                        } else {
+                            this.props.setIsSignedIn(true)
+                        }
+                    }}
                 />
             </SafeAreaView>
         );
@@ -62,6 +72,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: "flex-start",
         alignSelf: "flex-start",
+        borderWidth: 0,
         marginLeft: 24,
     },
     item: {
@@ -116,6 +127,7 @@ const mapDispatchToProps = dispatch => (
     bindActionCreators({
         setShareWithContacts,
         setSyncEventTitle,
+        setIsSignedIn,
     }, dispatch)
 );
 

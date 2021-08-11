@@ -1,9 +1,9 @@
-const INITIAL_STATE = {
+const CONTACTS_INITIAL_STATE = {
     contacts: [],
 };
 
 
-export default contactsReducer = (state = INITIAL_STATE, action) => {
+function contactsReducer(state = CONTACTS_INITIAL_STATE, action) {
     switch (action.type) {
         case "SYNC_CONTACTS":
             return {
@@ -13,3 +13,8 @@ export default contactsReducer = (state = INITIAL_STATE, action) => {
             return state
     }
 };
+
+export {
+    CONTACTS_INITIAL_STATE, 
+    contactsReducer
+}
