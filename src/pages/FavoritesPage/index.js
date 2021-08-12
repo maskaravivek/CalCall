@@ -11,10 +11,13 @@ import Avatar from "../../components/avatar";
 import { Linking } from 'react-native'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import syncContacts from '../../redux/actions/contactsAction'
+import { removeContact, syncContacts } from '../../redux/actions/contactsAction'
 import { getAvatarInitials, getDescriptionElement } from '../../utils/utils'
-import realm from '../../realm/realm'
 import { Icon, Badge } from 'react-native-elements'
+import { removeContactFromDB } from '../../tasks/contacts'
+import { deleteOldEvents, syncCalendarEvents, syncRegisteredContactEvents } from '../../tasks/events'
+import { getSortedContacts, updateRegisteredUserStatus } from '../../tasks/contacts'
+import RNCalendarEvents from "react-native-calendar-events";
 
 class FavoritesPage extends React.Component {
 
@@ -23,57 +26,47 @@ class FavoritesPage extends React.Component {
 
         this.state = {
             loading: true,
-            contacts: []
         };
     }
 
     async componentDidMount() {
-        this.updateContactListOnUI()
-        this._navListener = this.props.navigation.addListener('focus', () => {
-            this.updateContactListOnUI()
-        });
-    }
-
-    updateContactListOnUI() {
-        const contacts = realm.objects("Contact")
-        let favoriteContacts = contacts.filtered("favorite == true")
-
-        favoriteContacts = favoriteContacts.map(result => {
-            return {
-                recordID: result.recordID,
-                uid: result.uid,
-                thumbnailPath: result.thumbnailPath,
-                givenName: result.givenName,
-                familyName: result.familyName,
-                hasThumbnail: result.hasThumbnail,
-                phoneNumber: result.phoneNumber,
-                status: result.status,
-                statusMessage: result.statusMessage
-            }
-        });
-        this.showSortedContacts(favoriteContacts)
-    }
-
-    showSortedContacts(contacts) {
-        contacts.sort((a, b) => {
-            return a.givenName.localeCompare(b.givenName)
-        });
-        this.setState({
-            contacts: contacts
+        this.syncCalendar()
+        syncRegisteredContactEvents().then(() => {
+            updateRegisteredUserStatus()
+                .then(() => {
+                    return getSortedContacts()
+                }).then((contacts) => this.props.syncContacts(contacts))
         })
+    }
+
+    syncCalendar() {
+        deleteOldEvents(this.props.user.uid)
+        RNCalendarEvents.checkPermissions(readOnly = true)
+            .then(result => {
+                if (result === "authorized") {
+                    syncCalendarEvents(this.props.calendars.calendars, this.props.user.uid)
+                } else {
+                    RNCalendarEvents.requestPermissions(readOnly = true);
+                }
+            });
     }
 
     onPressContact(phoneNumber) {
         Linking.openURL(`facetime-audio://+1${phoneNumber}`)
     }
 
+    deleteContact(item) {
+        removeContactFromDB(item["recordId"])
+        this.props.removeContact(item)
+    }
+
     render() {
         return (
             <SafeAreaView style={styles.container}>
                 {
-                    this.state.contacts.length > 0 ? (<FlatList
-                        data={this.state.contacts}
-                        keyExtractor={item => item.recordID}
+                    this.props.contacts.contacts.length > 0 ? (<FlatList
+                        data={this.props.contacts.contacts}
+                        keyExtractor={item => item.recordId}
                         renderItem={({ item }) => <ListItem
                             leftElement={
                                 <View>
@@ -93,11 +86,12 @@ class FavoritesPage extends React.Component {
                                 </View>
 
                             }
-                            key={item["recordID"]}
+                            key={item["recordId"]}
                             title={`${item["givenName"]} ${item["familyName"]}`}
-                            description={getDescriptionElement(item["status"], item["statusMessage"])}
+                            description={getDescriptionElement(item["status"], item["statusValidity"])}
                             rightElement={<Icon onPress={() => this.onPressContact(item["phoneNumber"])} name="call"></Icon>}
                             onPress={() => this.props.navigation.navigate('Contact', item)}
+                            onDelete={() => this.deleteContact(item)}
                         />
                         }
                     />) :
@@ -149,7 +143,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => (
     bindActionCreators({
-        syncContacts,
+        removeContact,
+        syncContacts
     }, dispatch)
 );
 

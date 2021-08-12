@@ -42,7 +42,11 @@ class LinkPhoneNumberPage extends React.Component {
             }).then(() => {
                 console.log('Phone Number linked!');
                 this.props.setUserPhoneNumber(this.state.phoneNumber)
-                this.props.navigation.navigate('ConfigureCalendar')
+                if(this.props.route.params && !this.props.route.params.onboarding) {
+                    this.props.navigation.goBack()
+                } else {
+                    this.props.navigation.navigate('ConfigureCalendar')
+                }
             });
     }
 

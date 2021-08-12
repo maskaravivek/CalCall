@@ -602,6 +602,8 @@ PODS:
     - React-Core
   - react-native-safe-area-context (3.3.0):
     - React-Core
+  - react-native-select-contact (1.6.3):
+    - React-Core
   - react-native-sms (1.11.0):
     - React
   - React-perflogger (0.64.1)
@@ -745,6 +747,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-contacts (from `../node_modules/react-native-contacts`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-select-contact (from `../node_modules/react-native-select-contact`)
   - react-native-sms (from `../node_modules/react-native-sms`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -844,6 +847,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-contacts"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-select-contact:
+    :path: "../node_modules/react-native-select-contact"
   react-native-sms:
     :path: "../node_modules/react-native-sms"
   React-perflogger:
@@ -948,6 +953,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 500a59626037be5b3b3d89c5151bc3baa9abf1a9
   react-native-contacts: bc424db19c3384e44e6a9d9da9a78ee51b0aa7a1
   react-native-safe-area-context: 61c8c484a3a9e7d1fda19f7b1794b35bbfd2262a
+  react-native-select-contact: f88ccd9dbee6c4d1c32507291b431cf558a2ed42
   react-native-sms: 31fbb9d6ebb565ad32e409eaf9dc70329936a129
   React-perflogger: aad6d4b4a267936b3667260d1f649b6f6069a675
   React-RCTActionSheet: fc376be462c9c8d6ad82c0905442fd77f82a9d2a

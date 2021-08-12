@@ -51,13 +51,13 @@ class ListItem extends Component {
 
     renderRightActions = progress => (
         <View style={{ width: 64, flexDirection: "row" }}>
-            {this.renderRightAction("heart", "#ef5350", 64, progress)}
+            {this.renderRightAction("trash-outline", "#ef5350", 64, progress)}
         </View>
     );
 
     renderRightActions = progress => (
         <View style={{ width: 64, flexDirection: "row" }}>
-            {this.renderRightAction("heart", "#ef5350", 64, progress)}
+            {this.renderRightAction("trash-outline", "#ef5350", 64, progress)}
         </View>
     );
 

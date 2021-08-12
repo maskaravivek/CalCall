@@ -51,7 +51,7 @@ class ContactPage extends React.Component {
                 </View>
                 <Text style={styles.title}>{`${item.givenName} ${item.familyName}`}</Text>
                 {
-                    getDescriptionElement(item["status"], item["statusMessage"])
+                    getDescriptionElement(item["status"], item["statusValidity"])
                 }
                 <View style={styles.cards}>
                     <TouchableOpacity onPress={() => {
@@ -73,7 +73,10 @@ class ContactPage extends React.Component {
                             <Text style={styles.cardText}>Call</Text>
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => Linking.openURL(`whatsapp://send?phone=${item["phoneNumber"]}`)}>
+                    <TouchableOpacity onPress={() => {
+                        console.log(item["phoneNumber"])
+                        Linking.openURL(`whatsapp://send?phone=${item["phoneNumber"]}`)
+                    }}>
                         <View style={styles.cardView}>
                             <Icon name="logo-whatsapp" color='#FF8E9E' type='ionicon'></Icon>
                             <Text style={styles.cardText}>WhatsApp</Text>

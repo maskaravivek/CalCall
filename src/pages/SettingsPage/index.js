@@ -15,7 +15,9 @@ export default function SettingsPage({ navigation }) {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
-                <TouchableHighlight onPress={() => navigation.navigate('EditPhoneNumber')} underlayColor="white">
+                <TouchableHighlight onPress={() => navigation.navigate('EditPhoneNumber', {
+                    onboarding: false
+                })} underlayColor="white">
                     <View style={styles.button}>
                         <Icon
                             name='phone-portrait-outline' type='ionicon' color='#FF8E9E' /><Text style={styles.buttonText}>Change Phone Number</Text>

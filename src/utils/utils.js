@@ -16,13 +16,15 @@ function getAvatarInitials(textString) {
     return initials;
 };
 
-function getDescriptionElement(status, statusMessage) {
+function getDescriptionElement(status, statusValidity) {
+    let date = new Date(statusValidity)
+    let time = date.toLocaleTimeString([], {timeStyle: 'short'})
     if (status === "AVAILABLE") {
-        return <Text>{statusMessage}</Text>;
+        return <Text>Available</Text>;
     } else if (status === "IN_MEETING") {
-        return <View style={styles.viewContainer}><Text style={styles.text}>In a meeting till </Text><TimeAgo time={parseInt(statusMessage)} /></View>
+        return <View style={styles.viewContainer}><Text style={styles.text}>In a meeting till {time}</Text></View>
     } else if (status === "IN_MEETING") {
-        return <View style={styles.viewContainer}><Text style={styles.text}>Has a meeting in </Text><TimeAgo time={parseInt(statusMessage)} /></View>
+        return <View style={styles.viewContainer}><Text style={styles.text}>Has a meeting at {time}</Text></View>
     } else {
         return <View />
     }

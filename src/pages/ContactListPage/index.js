@@ -8,17 +8,18 @@ import {
     RefreshControl,
     View
 } from "react-native";
-import Contacts from "react-native-contacts";
+// import Contacts from "react-native-contacts";
 
 import ListItem from "../../components/listitem";
 import Avatar from "../../components/avatar";
 import RNCalendarEvents from "react-native-calendar-events";
 import { connect } from 'react-redux';
 import realm from '../../realm/realm'
-import { getAvatarInitials, getDescriptionElement } from '../../utils/utils'
+import { getAvatarInitials } from '../../utils/utils'
 import { deleteOldEvents, syncCalendarEvents, syncRegisteredContactEvents } from '../../tasks/events'
 import { syncDeviceContacts, updateRegisteredUserStatus, getSortedContacts } from '../../tasks/contacts'
 import { Button } from 'react-native-elements';
+
 
 class ContactList extends React.Component {
     constructor(props) {
@@ -29,7 +30,7 @@ class ContactList extends React.Component {
             contacts: []
         };
 
-        Contacts.iosEnableNotesUsage(false);
+        // Contacts.iosEnableNotesUsage(false);
     }
 
     async componentDidMount() {
@@ -86,10 +87,10 @@ class ContactList extends React.Component {
         })
     }
 
-    onFavoriteContact(recordID) {
-        console.log(recordID)
+    onFavoriteContact(recordId) {
+        console.log(recordId)
         const contacts = realm.objects("Contact");
-        const matchedContact = contacts.filtered(`recordID == '${recordID}'`)
+        const matchedContact = contacts.filtered(`recordId == '${recordId}'`)
         realm.write(() => {
             matchedContact[0].favorite = true
         });
@@ -100,7 +101,7 @@ class ContactList extends React.Component {
             <SafeAreaView style={styles.container}>
                 <FlatList
                     data={this.state.contacts}
-                    keyExtractor={item => item.recordID}
+                    keyExtractor={item => item.recordId}
                     refreshControl={
                         <RefreshControl
                             refreshing={this.state.loading}
@@ -126,10 +127,10 @@ class ContactList extends React.Component {
                                 height={40}
                             />
                         }
-                        key={item["recordID"]}
+                        key={item["recordId"]}
                         title={`${item["givenName"]} ${item["familyName"]}`}
                         onPress={() => this.props.navigation.navigate('Contact', item)}
-                        onDelete={() => this.onFavoriteContact(item["recordID"])}
+                        onDelete={() => this.onFavoriteContact(item["recordId"])}
                     />
                     }
                 />

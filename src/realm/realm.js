@@ -18,18 +18,16 @@ class Contact extends Realm.Object { }
 Contact.schema = {
     name: "Contact",
     properties: {
-        recordID: "string",
+        recordId: "string",
         uid: "string?",
-        thumbnailPath: "string",
         givenName: "string",
         familyName: "string",
-        hasThumbnail: "bool",
         phoneNumber: "string",
-        status: {type: "string", default: "AVAILABLE"},
-        statusMessage: {type: "string", default: "Available"},
-        favorite: {type: "bool", default: false}
+        status: { type: "string", default: "AVAILABLE" },
+        statusValidity: { type: "int", default: 0 },
+        favorite: { type: "bool", default: false }
     },
-    primaryKey: "recordID",
+    primaryKey: "recordId",
 };
 
 export default new Realm({ schema: [Event, Contact] });

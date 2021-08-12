@@ -1,6 +1,7 @@
 import firestore from '@react-native-firebase/firestore';
 import realm from '../realm/realm'
 import RNCalendarEvents from "react-native-calendar-events";
+import { UpdateMode } from "realm";
 
 async function syncRegisteredContactEvents() {
     const contacts = realm.objects("Contact");
@@ -10,6 +11,7 @@ async function syncRegisteredContactEvents() {
 }
 
 async function getUserEvents(uid) {
+    console.log('fetching user events', uid)
     firestore().collection('Users')
         .doc(uid)
         .collection('userEvents')
@@ -46,7 +48,7 @@ function syncCalendarEvents(calendars, uid) {
                     }
                     saveEvent(uid, event.id, eventObj)
                 })
-            });
+            }).then(() => console.log('calendar synced', calendar.id));
     })
 }
 

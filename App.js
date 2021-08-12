@@ -10,13 +10,15 @@ import SettingsPage from './src/pages/SettingsPage';
 import FavoritesPage from './src/pages/FavoritesPage';
 import SignInPage from './src/pages/SignInPage';
 import ContactPage from './src/pages/ContactPage';
-import { Provider, useSelector } from 'react-redux';
+import { Provider, useSelector, useDispatch } from 'react-redux';
 import { store, persistor } from './src/redux/store';
 import { PersistGate } from 'redux-persist/integration/react'
 import { Provider as PaperProvider } from 'react-native-paper';
-import { Appbar } from 'react-native-paper';
+import { Appbar, Menu } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ToastProvider } from 'react-native-toast-notifications'
+import { selectContactAndSave } from './src/tasks/contacts'
+import { syncContacts } from './src/redux/actions/contactsAction'
 
 import { StyleSheet } from "react-native";
 
@@ -52,11 +54,33 @@ function Home() {
 }
 
 function CustomNavigationBar({ navigation, options }) {
+  const dispatch = useDispatch();
+
+  const [visible, setVisible] = React.useState(false);
+  const openMenu = () => setVisible(true);
+  const closeMenu = () => setVisible(false);
+
   return (
     <Appbar.Header dark={true} style={styles.appbar}>
       {options.previous ? <Appbar.BackAction onPress={navigation.goBack} /> : null}
+      {options.plus ? <Appbar.Action icon="plus" onPress={() => {
+        selectContactAndSave().then((contacts) => {
+          dispatch(syncContacts(contacts));
+        });
+      }} /> : null}
       <Appbar.Content titleStyle={styles.appbarTitle} title={options.title} />
-      {options.settings && <Appbar.Action icon="cog-outline" onPress={() => navigation.navigate("Settings")} />}
+      {options.settings &&
+        <Menu
+          visible={visible}
+          onDismiss={closeMenu}
+          anchor={
+            <Appbar.Action icon="dots-vertical" color="white" onPress={openMenu} />
+          }>
+          <Menu.Item onPress={() => {
+            closeMenu()
+            navigation.navigate('Settings')
+          }} title="Settings" />
+        </Menu>}
     </Appbar.Header>
   );
 }
@@ -83,18 +107,14 @@ const App = () => {
             }}>
             {
               user.isSignedIn ? (<>
-                <Stack.Screen
-                  name="Home"
-                  component={Home}
-                  options={{ headerShown: false }}
-                />
+                <Stack.Screen name="Home" component={FavoritesPage} options={{ title: 'Favorites', previous: false, plus: true, settings: true }} />
                 <Stack.Screen name="Settings" component={SettingsPage} options={{ title: 'Settings', previous: true, settings: false }} />
                 <Stack.Screen name="Contact" component={ContactPage} options={{ title: 'Contact', previous: true, settings: false }} />
                 <Stack.Screen name="EditCalendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: true, settings: false }} />
                 <Stack.Screen name="EditPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Edit Phone Number', previous: true, settings: false }} />
               </>) : (<>
-                <Stack.Screen name="LinkPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Link Phone Number', settings: false }} />
-                <Stack.Screen name="ConfigureCalendar" component={LinkCalendarsPage} options={{ title: 'Configure Calendar', settings: false }} />
+                <Stack.Screen name="LinkPhoneNumber" component={LinkPhoneNumberPage} options={{ title: 'Link Phone Number', previous: false, settings: false }} />
+                <Stack.Screen name="ConfigureCalendar" component={LinkCalendarsPage} options={{ title: 'Configure Calendar', previous: false, settings: false }} />
                 <Stack.Screen name="Calendars" component={ChooseCalendars} options={{ title: 'Choose Calendars', previous: false, settings: false }} />
               </>)
             }

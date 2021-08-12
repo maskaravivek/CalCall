@@ -2,6 +2,29 @@ import firestore from '@react-native-firebase/firestore';
 import realm from '../realm/realm'
 import Contacts from "react-native-contacts";
 import { UpdateMode } from "realm";
+import { selectContactPhone } from 'react-native-select-contact';
+
+const UPCOMING_MEETING_TIME_INTERVAL = 100 * 15 * 60000;
+
+function selectContactAndSave() {
+    return selectContactPhone()
+        .then(selection => {
+            if (!selection) {
+                return null;
+            }
+
+            let { contact, selectedPhone } = selection;
+            contact["favorite"] = true
+            console.log(`Selected ${selectedPhone.type} phone number ${selectedPhone.number} from ${contact.name}`);
+
+            return getPhoneNumberUidMap()
+                .then(phoneNumberUidMap => {
+                    addContact(contact, contact.phones[0].number, phoneNumberUidMap);
+                }).then(() => {
+                    return getSortedContacts();
+                })
+        });
+}
 
 async function syncDeviceContacts() {
     return Contacts.getAll()
@@ -10,34 +33,50 @@ async function syncDeviceContacts() {
                 .filter(c => c.phoneNumbers.length > 0 && c.givenName.length > 0)
                 .map(c => {
                     return {
-                        "hasThumbnail": c["hasThumbnail"],
-                        "thumbnailPath": c["thumbnailPath"],
                         "givenName": c["givenName"] || "",
                         "familyName": c["familyName"] || "",
-                        "recordID": c["recordID"],
+                        "recordId": c["recordId"],
                         "phoneNumbers": c["phoneNumbers"],
+                        "favorite": false
                     }
                 })
         }).then(contacts => {
             getPhoneNumberUidMap()
                 .then(phoneNumberUidMap => {
                     contacts.forEach(contact => {
-                        const phoneNumber = contact.phoneNumbers[0].number.replace(/[^\d]/g, '').slice(-10)
-                        let uid = phoneNumberUidMap[phoneNumber];
-                        realm.write(() => {
-                            realm.create("Contact", {
-                                recordID: contact.recordID,
-                                uid: uid,
-                                thumbnailPath: contact.thumbnailPath,
-                                givenName: contact.givenName,
-                                familyName: contact.familyName,
-                                hasThumbnail: contact.hasThumbnail,
-                                phoneNumber: phoneNumber
-                            }, UpdateMode.Modified);
-                        });
+                        addContact(contact, contact.phoneNumbers[0].number, phoneNumberUidMap);
                     })
                 })
         })
+}
+
+function addContact(contact, phoneNumber, phoneNumberUidMap) {
+    let uid = phoneNumberUidMap[cleanedPhoneNumber(phoneNumber)];
+    realm.write(() => {
+        realm.create("Contact", {
+            recordId: contact.recordId,
+            uid: uid,
+            givenName: contact.givenName,
+            familyName: contact.familyName,
+            phoneNumber: phoneNumber,
+            favorite: contact.favorite
+        }, UpdateMode.Modified);
+    });
+}
+
+function removeContactFromDB(recordId) {
+    const contacts = realm.objects("Contact");
+    const matchedContact = contacts.filtered(`recordId == '${recordId}'`)
+
+    matchedContact.forEach(contact => {
+        realm.write(() => {
+            realm.delete(contact);
+        });
+    })
+}
+
+function cleanedPhoneNumber(phoneNumber) {
+    return phoneNumber.replace(/[^\d]/g, '').slice(-10);
 }
 
 async function getPhoneNumberUidMap() {
@@ -56,48 +95,54 @@ async function getPhoneNumberUidMap() {
 async function updateRegisteredUserStatus() {
     const events = realm.objects("Event");
     const filteredEvents = events
-        .filtered(`(startDate > ${Date.now()} && startDate <= ${Date.now() + (100 * 15 * 60000)}) 
+        .filtered(`(startDate > ${Date.now()} && startDate <= ${Date.now() + UPCOMING_MEETING_TIME_INTERVAL}) 
     || (startDate < ${Date.now()} && endDate > ${Date.now()})`)
+
+    console.log('filtered', filteredEvents)
 
     let userStatusMap = {}
     filteredEvents.forEach(event => {
         if (event.startDate < Date.now() && event.endDate > Date.now()) {
             userStatusMap[event.uid] = {
                 "status": "IN_MEETING",
-                "statusMessage": `${event.endDate}`
+                "statusValidity": event.endDate
             }
-        } else if (event.startDate <= (Date.now() + (100 * 15 * 60000))) {
+        } else if (event.startDate <= (Date.now() + UPCOMING_MEETING_TIME_INTERVAL)) {
             if (!(event.uid in userStatusMap)) {
                 userStatusMap[event.uid] = {
                     "status": "UPCOMING_MEETING",
-                    "statusMessage": `${event.startDate}`
+                    "statusValidity": event.startDate
                 }
             }
         }
     })
 
     for (const [uid, value] of Object.entries(userStatusMap)) {
-        updateContactStatus(uid, value["status"], value["statusMessage"])
+        updateContactStatus(uid, value["status"], value["statusValidity"])
     }
 }
 
-function updateContactStatus(uid, status, statusMessage) {
+function updateContactStatus(uid, status, statusValidity) {
     const contacts = realm.objects("Contact");
     const matchedContact = contacts.filtered(`uid == '${uid}'`)
 
     matchedContact.forEach(contact => {
+        console.log('updating status for uid', uid, status, statusValidity)
         realm.write(() => {
             contact.status = status
-            contact.statusMessage = statusMessage
+            contact.statusValidity = statusValidity
         });
     })
+
+    const newcontact = realm.objects("Contact");
+    console.log(newcontact)
 }
 
 function getSortedContacts() {
     return realm.objects("Contact")
         .map(result => {
             return {
-                recordID: result.recordID,
+                recordId: result.recordId,
                 uid: result.uid,
                 thumbnailPath: result.thumbnailPath,
                 givenName: result.givenName,
@@ -105,7 +150,7 @@ function getSortedContacts() {
                 hasThumbnail: result.hasThumbnail,
                 phoneNumber: result.phoneNumber,
                 status: result.status,
-                statusMessage: result.statusMessage
+                statusValidity: result.statusValidity
             }
         }).sort(sortContacts)
 }
@@ -117,5 +162,7 @@ function sortContacts(a, b) {
 export {
     updateRegisteredUserStatus,
     syncDeviceContacts,
-    getSortedContacts
+    getSortedContacts,
+    selectContactAndSave,
+    removeContactFromDB,
 }
