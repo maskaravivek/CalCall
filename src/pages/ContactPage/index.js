@@ -12,7 +12,7 @@ import { bindActionCreators } from 'redux';
 import setUser from '../../redux/actions/userAction'
 import { Icon, Badge } from 'react-native-elements';
 import Avatar from "../../components/avatar";
-import { getAvatarInitials, getDescriptionElement } from '../../utils/utils'
+import { getAvatarInitials, getDescriptionElement, getStatusBadge } from '../../utils/utils'
 import SendSMS from 'react-native-sms'
 
 class ContactPage extends React.Component {
@@ -44,7 +44,7 @@ class ContactPage extends React.Component {
                     />
 
                     <Badge
-                        status={item["status"] === "AVAILABLE" ? "success" : "error"}
+                        status={getStatusBadge(item["status"])}
                         badgeStyle={styles.statusBadge}
                         containerStyle={{ position: 'absolute', top: 5, right: 5 }}
                     />

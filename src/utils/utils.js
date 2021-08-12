@@ -18,7 +18,7 @@ function getAvatarInitials(textString) {
 
 function getDescriptionElement(status, statusValidity) {
     let date = new Date(statusValidity)
-    let time = date.toLocaleTimeString([], {timeStyle: 'short'})
+    let time = date.toLocaleTimeString([], { timeStyle: 'short' })
     if (status === "AVAILABLE") {
         return <Text>Available</Text>;
     } else if (status === "IN_MEETING") {
@@ -27,6 +27,16 @@ function getDescriptionElement(status, statusValidity) {
         return <View style={styles.viewContainer}><Text style={styles.text}>Has a meeting at {time}</Text></View>
     } else {
         return <View />
+    }
+}
+
+function getStatusBadge(status) {
+    if (status === "AVAILABLE") {
+        return "success"
+    } else if (status === "IN_MEETING") {
+        return "error"
+    } else {
+        return "warning"
     }
 }
 
@@ -41,5 +51,6 @@ const styles = StyleSheet.create({
 
 export {
     getAvatarInitials,
-    getDescriptionElement
+    getDescriptionElement,
+    getStatusBadge
 }

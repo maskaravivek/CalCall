@@ -94,20 +94,19 @@ async function getPhoneNumberUidMap() {
 
 async function updateRegisteredUserStatus() {
     const events = realm.objects("Event");
+    const currentTimestamp = Date.now();
     const filteredEvents = events
-        .filtered(`(startDate > ${Date.now()} && startDate <= ${Date.now() + UPCOMING_MEETING_TIME_INTERVAL}) 
-    || (startDate < ${Date.now()} && endDate > ${Date.now()})`)
-
-    console.log('filtered', filteredEvents)
+        .filtered(`(startDate > ${currentTimestamp} && startDate <= ${currentTimestamp + UPCOMING_MEETING_TIME_INTERVAL}) 
+    || (startDate < ${currentTimestamp} && endDate > ${currentTimestamp})`)
 
     let userStatusMap = {}
     filteredEvents.forEach(event => {
-        if (event.startDate < Date.now() && event.endDate > Date.now()) {
+        if (event.startDate < currentTimestamp && event.endDate > currentTimestamp) {
             userStatusMap[event.uid] = {
                 "status": "IN_MEETING",
                 "statusValidity": event.endDate
             }
-        } else if (event.startDate <= (Date.now() + UPCOMING_MEETING_TIME_INTERVAL)) {
+        } else if (event.startDate <= (currentTimestamp + UPCOMING_MEETING_TIME_INTERVAL)) {
             if (!(event.uid in userStatusMap)) {
                 userStatusMap[event.uid] = {
                     "status": "UPCOMING_MEETING",
@@ -127,15 +126,11 @@ function updateContactStatus(uid, status, statusValidity) {
     const matchedContact = contacts.filtered(`uid == '${uid}'`)
 
     matchedContact.forEach(contact => {
-        console.log('updating status for uid', uid, status, statusValidity)
         realm.write(() => {
             contact.status = status
             contact.statusValidity = statusValidity
         });
     })
-
-    const newcontact = realm.objects("Contact");
-    console.log(newcontact)
 }
 
 function getSortedContacts() {

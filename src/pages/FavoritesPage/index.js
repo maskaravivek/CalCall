@@ -4,6 +4,7 @@ import {
     StyleSheet,
     FlatList,
     Text,
+    RefreshControl,
     View
 } from "react-native";
 import ListItem from "../../components/listitem";
@@ -12,7 +13,7 @@ import { Linking } from 'react-native'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { removeContact, syncContacts } from '../../redux/actions/contactsAction'
-import { getAvatarInitials, getDescriptionElement } from '../../utils/utils'
+import { getAvatarInitials, getDescriptionElement, getStatusBadge } from '../../utils/utils'
 import { Icon, Badge } from 'react-native-elements'
 import { removeContactFromDB } from '../../tasks/contacts'
 import { deleteOldEvents, syncCalendarEvents, syncRegisteredContactEvents } from '../../tasks/events'
@@ -25,17 +26,23 @@ class FavoritesPage extends React.Component {
         super(props);
 
         this.state = {
-            loading: true,
+            loading: false,
         };
     }
 
     async componentDidMount() {
+        this.refreshUI();
+    }
+
+    refreshUI() {
         this.syncCalendar()
         syncRegisteredContactEvents().then(() => {
             updateRegisteredUserStatus()
                 .then(() => {
-                    return getSortedContacts()
-                }).then((contacts) => this.props.syncContacts(contacts))
+                    console.log("Refreshing UI")
+                    const contacts = getSortedContacts()
+                    this.props.syncContacts(contacts)
+                })
         })
     }
 
@@ -64,9 +71,15 @@ class FavoritesPage extends React.Component {
         return (
             <SafeAreaView style={styles.container}>
                 {
-                    this.props.contacts.contacts.length > 0 ? (<FlatList
+                    this.props.contacts.contacts && this.props.contacts.contacts.length > 0 ? (<FlatList
                         data={this.props.contacts.contacts}
                         keyExtractor={item => item.recordId}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={this.state.loading}
+                                onRefresh={() => this.refreshUI()}
+                            />
+                        }
                         renderItem={({ item }) => <ListItem
                             leftElement={
                                 <View>
@@ -79,7 +92,7 @@ class FavoritesPage extends React.Component {
                                     />
 
                                     <Badge
-                                        status={item["status"] === "AVAILABLE" ? "success" : "error"}
+                                        status={getStatusBadge(item["status"])}
                                         badgeStyle={styles.statusBadge}
                                         containerStyle={{ position: 'absolute', top: 3, right: 3 }}
                                     />
