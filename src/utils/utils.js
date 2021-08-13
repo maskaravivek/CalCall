@@ -4,7 +4,8 @@ import {
     Text,
     StyleSheet
 } from "react-native";
-import TimeAgo from 'react-native-timeago';
+
+import { Icon, Badge, Button, Overlay } from 'react-native-elements';
 
 function getAvatarInitials(textString) {
     if (!textString) return "";

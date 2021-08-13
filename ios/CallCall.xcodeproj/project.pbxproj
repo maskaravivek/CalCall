@@ -136,7 +136,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				E270121126C52ED000A5EAC9 /* RNUnifiedContacts */,
 				E2D30C8626C0F96100F7A2DB /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* CallCall */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -158,14 +157,6 @@
 				00E356EE1AD99517003FC87E /* CallCallTests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		E270121126C52ED000A5EAC9 /* RNUnifiedContacts */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = RNUnifiedContacts;
-			path = "../node_modules/react-native-unified-contacts/RNUnifiedContacts";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -524,7 +515,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = VJ92GY3HMA;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = CallCall/Info.plist;
@@ -532,7 +523,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.3.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -555,14 +546,14 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = VJ92GY3HMA;
 				INFOPLIST_FILE = CallCall/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.3.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

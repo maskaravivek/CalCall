@@ -4,23 +4,58 @@ import {
     SafeAreaView,
     StyleSheet,
     View,
+    Share,
+    Alert,
     TouchableOpacity
 } from "react-native";
 import { Linking } from 'react-native'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import setUser from '../../redux/actions/userAction'
-import { Icon, Badge } from 'react-native-elements';
+import { Icon, Badge, Button, Overlay } from 'react-native-elements';
 import Avatar from "../../components/avatar";
 import { getAvatarInitials, getDescriptionElement, getStatusBadge } from '../../utils/utils'
 import SendSMS from 'react-native-sms'
+import Modal from 'react-native-modal';
 
+function getIOSActions(phoneNumber) {
+    return {
+        "call": {
+            "type": "CALL",
+            "key": "call",
+            "icon": "call-outline",
+            "text": "Call",
+            "url": `tel://${phoneNumber}`
+        },
+        "whatsapp": {
+            "type": "CALL_OR_MESSAGE",
+            "key": "whatsapp",
+            "icon": "logo-whatsapp",
+            "text": "Whatsapp",
+            "url": `whatsapp://send?phone=${phoneNumber}`
+        },
+        "ft-video": {
+            "type": "CALL",
+            "key": "ft-video",
+            "icon": "videocam-outline",
+            "text": "Facetime",
+            "url": `facetime://${phoneNumber}`
+        },
+        "ft-audio": {
+            "type": "CALL",
+            "key": "ft-audio",
+            "icon": "mic-outline",
+            "text": "FT Audio",
+            "url": `facetime-audio://${phoneNumber}`
+        }
+    }
+}
 class ContactPage extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            phoneNumber: null
+            isModalVisisble: false
         };
     }
 
@@ -30,8 +65,74 @@ class ContactPage extends React.Component {
         })
     }
 
+    getCallActionsIOS(status, statusValidity, firstName, phoneNumber) {
+        const actions = getIOSActions(phoneNumber)
+        let date = new Date(statusValidity)
+        let time = date.toLocaleTimeString([], { timeStyle: 'short' })
+
+        return Object.keys(actions)
+            .map(function (key) {
+                return actions[key];
+            }).map(value => <TouchableOpacity key={value["key"]} onPress={() => {
+                if ((status === "IN_MEETING" && value["type"] === "CALL") || true) {
+                    Alert.alert(
+                        "Do you really want to call?",
+                        `${firstName} is in a meeting till ${time}. If its not urgent, send a message instead`,
+                        [
+                            {
+                                text: "Cancel",
+                                onPress: () => console.log("Cancel Pressed"),
+                                style: "cancel"
+                            },
+                            { text: "Send message", onPress: () => this.sendMessage(phoneNumber) },
+                            { text: "Call anyway", onPress: () => Linking.openURL(value["url"]) }
+                        ]
+                    );
+
+                } else {
+                    Linking.openURL(value["url"])
+                }
+            }}>
+                <View style={styles.cardView}>
+                    <Icon name={value["icon"]} color='#FF8E9E' type='ionicon'></Icon>
+                    <Text style={styles.cardText}>{value["text"]}</Text>
+                </View>
+            </TouchableOpacity>);
+    }
+
+    async onShare() {
+        try {
+            const result = await Share.share({
+                title: 'CalCall',
+                message: 'Hey there! Install CalCall so that I know when you are busy and avoid calling you during meetings!',
+                url: 'https://apps.apple.com/us/app/calcall/id1580547117'
+            });
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    // shared with activity type of result.activityType
+                } else {
+                    // shared
+                }
+            } else if (result.action === Share.dismissedAction) {
+                // dismissed
+            }
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
+    sendMessage(phoneNumber) {
+        SendSMS.send({
+            recipients: [phoneNumber],
+            allowAndroidSendWithoutReadPermission: true
+        }, (completed, cancelled, error) => {
+            console.log('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
+        });
+    }
+
     render() {
         let item = this.props.route.params
+
         return (
             <SafeAreaView style={styles.container}>
                 <View>
@@ -55,51 +156,34 @@ class ContactPage extends React.Component {
                 }
                 <View style={styles.cards}>
                     <TouchableOpacity onPress={() => {
-                        SendSMS.send({
-                            recipients: [item["phoneNumber"]],
-                            allowAndroidSendWithoutReadPermission: true
-                        }, (completed, cancelled, error) => {
-                            console.log('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
-                        });
+                        this.sendMessage(item["phoneNumber"])
                     }}>
                         <View style={styles.cardView}>
                             <Icon name="chatbubble-outline" color='#FF8E9E' type='ionicon'></Icon>
                             <Text style={styles.cardText}>Message</Text>
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => Linking.openURL(`tel://${item["phoneNumber"]}`)}>
-                        <View style={styles.cardView}>
-                            <Icon name="call-outline" color='#FF8E9E' type='ionicon'></Icon>
-                            <Text style={styles.cardText}>Call</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
-                        console.log(item["phoneNumber"])
-                        Linking.openURL(`whatsapp://send?phone=${item["phoneNumber"]}`)
-                    }}>
-                        <View style={styles.cardView}>
-                            <Icon name="logo-whatsapp" color='#FF8E9E' type='ionicon'></Icon>
-                            <Text style={styles.cardText}>WhatsApp</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => Linking.openURL(`facetime://${item["phoneNumber"]}`)}>
-                        <View style={styles.cardView}>
-                            <Icon name="videocam-outline" color='#FF8E9E' type='ionicon'></Icon>
-                            <Text style={styles.cardText}>Facetime</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => Linking.openURL(`facetime-audio://${item["phoneNumber"]}`)}>
-                        <View style={styles.cardView}>
-                            <Icon name="mic-outline" color='#FF8E9E' type='ionicon'></Icon>
-                            <Text style={styles.cardText}>FT Audio</Text>
-                        </View>
-                    </TouchableOpacity>
+                    {
+                        this.getCallActionsIOS(item["status"], item["statusValidity"], item["givenName"], item["phoneNumber"])
+                    }
                 </View>
 
                 <View style={styles.fullCardView}>
                     <Text style={styles.mobileTitle}>mobile number</Text>
                     <Text style={styles.mobileNumber}>{item["phoneNumber"]}</Text>
                 </View>
+
+                {
+                    item["uid"] == null
+                    && <View style={styles.inviteView}>
+                        <Text>Invite {item["givenName"]} to use the app!</Text>
+                        <Button title="Invite"
+                            loading={this.state.loading}
+                            buttonStyle={styles.button}
+                            onPress={() => this.onShare()}
+                        />
+                    </View>
+                }
             </SafeAreaView>
         );
     }
@@ -125,7 +209,11 @@ const styles = StyleSheet.create({
         height: 44,
     },
     button: {
-        width: 300
+        borderRadius: 20,
+        marginTop: 18,
+        alignContent: "center",
+        alignItems: "center",
+        backgroundColor: '#FF8E9E'
     },
     buttonText: {
         textAlign: 'center',
@@ -180,6 +268,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 2,
     },
+    inviteView: {
+        marginTop: 64
+    },
     subtitle: {
         fontSize: 14,
         marginBottom: 12,
@@ -211,6 +302,21 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         padding: 10,
     },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 22,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 4,
+        borderColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    modelContentTitle: {
+        fontSize: 20,
+        marginBottom: 12,
+    },
+    modalButtonsView: {
+        flexDirection: "row"
+    }
 });
 
 const mapStateToProps = (state) => {

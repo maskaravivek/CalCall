@@ -13,10 +13,8 @@ function selectContactAndSave() {
                 return null;
             }
 
-            let { contact, selectedPhone } = selection;
+            let { contact } = selection;
             contact["favorite"] = true
-            console.log(`Selected ${selectedPhone.type} phone number ${selectedPhone.number} from ${contact.name}`);
-
             return getPhoneNumberUidMap()
                 .then(phoneNumberUidMap => {
                     addContact(contact, contact.phones[0].number, phoneNumberUidMap);
@@ -99,7 +97,7 @@ async function updateRegisteredUserStatus() {
         .filtered(`(startDate > ${currentTimestamp} && startDate <= ${currentTimestamp + UPCOMING_MEETING_TIME_INTERVAL}) 
     || (startDate < ${currentTimestamp} && endDate > ${currentTimestamp})`)
 
-    let userStatusMap = {}
+    let userStatusMap = getUserMap()
     filteredEvents.forEach(event => {
         if (event.startDate < currentTimestamp && event.endDate > currentTimestamp) {
             userStatusMap[event.uid] = {
@@ -119,6 +117,19 @@ async function updateRegisteredUserStatus() {
     for (const [uid, value] of Object.entries(userStatusMap)) {
         updateContactStatus(uid, value["status"], value["statusValidity"])
     }
+}
+
+function getUserMap() {
+    let map = {}
+    const contacts = realm.objects("Contact");
+    const registeredContacts = contacts.filtered("uid != null")
+    registeredContacts.forEach((contact) => {
+        map[contact.uid] = {
+            "status": "AVAILABLE",
+            "statusValidity": 0
+        }
+    })
+    return map;
 }
 
 function updateContactStatus(uid, status, statusValidity) {

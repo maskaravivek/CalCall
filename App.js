@@ -65,7 +65,9 @@ function CustomNavigationBar({ navigation, options }) {
       {options.previous ? <Appbar.BackAction onPress={navigation.goBack} /> : null}
       {options.plus ? <Appbar.Action icon="plus" onPress={() => {
         selectContactAndSave().then((contacts) => {
-          dispatch(syncContacts(contacts));
+          if (contacts != null) {
+            dispatch(syncContacts(contacts));
+          }
         });
       }} /> : null}
       <Appbar.Content titleStyle={styles.appbarTitle} title={options.title} />

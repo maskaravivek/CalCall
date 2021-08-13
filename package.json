@@ -37,6 +37,7 @@
     "react-native-screens": "^3.5.0",
     "react-native-select-contact": "^1.6.3",
     "react-native-sms": "^1.11.0",
+    "react-native-splash-screen": "^3.2.0",
     "react-native-timeago": "^0.5.0",
     "react-native-toast-notifications": "^3.1.0",
     "react-native-unified-contacts": "^2.0.0-pre.2",

@@ -5,7 +5,6 @@ import { UpdateMode } from "realm";
 
 async function syncRegisteredContactEvents() {
     const contacts = realm.objects("Contact");
-    console.log(contacts)
     const registeredContacts = contacts.filtered("uid != null")
     const uids = registeredContacts.map((contact) => contact.uid);
     uids.forEach(uid => getUserEvents(uid))
