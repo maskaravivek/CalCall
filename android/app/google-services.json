@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:427029793980:android:b3cbf89bf0e70bf167d4b9",
+        "mobilesdk_app_id": "1:427029793980:android:e525ec484c1ae46767d4b9",
         "android_client_info": {
-          "package_name": "com.maskaravivek.calcal"
+          "package_name": "com.maskaravivek.calcall"
         }
       },
       "oauth_client": [
@@ -29,6 +29,13 @@
             {
               "client_id": "427029793980-vto8ufprdpbbfpjufskoq8htep7jtm46.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "427029793980-7eu8srg6nemf0mrspe24n9e5f37r1h1o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.maskaravivek.calcall"
+              }
             }
           ]
         }

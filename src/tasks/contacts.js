@@ -54,8 +54,8 @@ function addContact(contact, phoneNumber, phoneNumberUidMap) {
         realm.create("Contact", {
             recordId: contact.recordId,
             uid: uid,
-            givenName: contact.givenName,
-            familyName: contact.familyName,
+            givenName: contact.givenName || phoneNumber,
+            familyName: contact.familyName || "",
             phoneNumber: phoneNumber,
             favorite: contact.favorite
         }, UpdateMode.Modified);

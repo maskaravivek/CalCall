@@ -1,4 +1,4 @@
-package com.callcall;
+package com.maskaravivek.calcall;
 
 import com.facebook.react.ReactActivity;
 import android.os.Bundle;
