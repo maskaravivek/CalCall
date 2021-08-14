@@ -5,8 +5,6 @@ import {
     StyleSheet
 } from "react-native";
 
-import { Icon, Badge, Button, Overlay } from 'react-native-elements';
-
 function getAvatarInitials(textString) {
     if (!textString) return "";
     const text = textString.trim();

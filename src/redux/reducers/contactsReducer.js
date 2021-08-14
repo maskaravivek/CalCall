@@ -1,5 +1,6 @@
 const CONTACTS_INITIAL_STATE = {
     contacts: [],
+    selectedContact: null
 };
 
 
@@ -19,6 +20,11 @@ function contactsReducer(state = CONTACTS_INITIAL_STATE, action) {
             return {
                 ...state,
                 contacts: state.contacts.filter(item => item.recordId != action.payload.recordId)
+            }
+        case "SET_SELECTED_CONTACT":
+            return {
+                ...state,
+                selectedContact: action.payload
             }
         default:
             return state

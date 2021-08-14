@@ -19,8 +19,16 @@ const removeContact = contact => (
     }
 );
 
+const setSelectedContact = contact => (
+    {
+        type: 'SET_SELECTED_CONTACT',
+        payload: contact,
+    }
+);
+
 export {
     syncContacts,
     addContact,
     removeContact,
+    setSelectedContact,
 }

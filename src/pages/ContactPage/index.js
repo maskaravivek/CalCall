@@ -12,11 +12,10 @@ import { Linking } from 'react-native'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import setUser from '../../redux/actions/userAction'
-import { Icon, Badge, Button, Overlay } from 'react-native-elements';
+import { Icon, Badge, Button } from 'react-native-elements';
 import Avatar from "../../components/avatar";
 import { getAvatarInitials, getDescriptionElement, getStatusBadge } from '../../utils/utils'
 import SendSMS from 'react-native-sms'
-import Modal from 'react-native-modal';
 
 function getIOSActions(phoneNumber) {
     return {
@@ -74,7 +73,7 @@ class ContactPage extends React.Component {
             .map(function (key) {
                 return actions[key];
             }).map(value => <TouchableOpacity key={value["key"]} onPress={() => {
-                if ((status === "IN_MEETING" && value["type"] === "CALL") || true) {
+                if ((status === "IN_MEETING" && value["type"] === "CALL")) {
                     Alert.alert(
                         "Do you really want to call?",
                         `${firstName} is in a meeting till ${time}. If its not urgent, send a message instead`,

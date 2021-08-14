@@ -12,14 +12,13 @@ import Avatar from "../../components/avatar";
 import { Linking } from 'react-native'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { removeContact, syncContacts } from '../../redux/actions/contactsAction'
+import { removeContact, syncContacts, setSelectedContact } from '../../redux/actions/contactsAction'
 import { getAvatarInitials, getDescriptionElement, getStatusBadge } from '../../utils/utils'
 import { Icon, Badge } from 'react-native-elements'
 import { removeContactFromDB } from '../../tasks/contacts'
-import { deleteOldEvents, syncCalendarEvents, syncRegisteredContactEvents } from '../../tasks/events'
-import { getSortedContacts, updateRegisteredUserStatus } from '../../tasks/contacts'
+import { getSortedContacts } from '../../tasks/contacts'
+import { sync } from '../../tasks/tasks'
 import RNCalendarEvents from "react-native-calendar-events";
-
 class FavoritesPage extends React.Component {
 
     constructor(props) {
@@ -32,26 +31,25 @@ class FavoritesPage extends React.Component {
 
     async componentDidMount() {
         this.refreshUI();
+        this.syncAndRefresh();
+    }
+
+    async syncAndRefresh() {
+        this.performSync().then(() => this.refreshUI())
     }
 
     refreshUI() {
-        this.syncCalendar()
-        syncRegisteredContactEvents().then(() => {
-            updateRegisteredUserStatus()
-                .then(() => {
-                    console.log("Refreshing UI")
-                    const contacts = getSortedContacts()
-                    this.props.syncContacts(contacts)
-                })
-        })
+        console.log("Refreshing UI")
+        const contacts = getSortedContacts()
+        this.props.syncContacts(contacts)
     }
 
-    syncCalendar() {
-        deleteOldEvents(this.props.user.uid)
-        RNCalendarEvents.checkPermissions(readOnly = true)
+    performSync() {
+        console.log('performing sync for uid', this.props.user.uid)
+        return RNCalendarEvents.checkPermissions(readOnly = true)
             .then(result => {
                 if (result === "authorized") {
-                    syncCalendarEvents(this.props.calendars.calendars, this.props.user.uid)
+                    return sync(this.props.user.uid, this.props.calendars.calendars)
                 } else {
                     RNCalendarEvents.requestPermissions(readOnly = true);
                 }
@@ -77,7 +75,7 @@ class FavoritesPage extends React.Component {
                         refreshControl={
                             <RefreshControl
                                 refreshing={this.state.loading}
-                                onRefresh={() => this.refreshUI()}
+                                onRefresh={() => this.syncAndRefresh()}
                             />
                         }
                         renderItem={({ item }) => <ListItem
@@ -103,7 +101,10 @@ class FavoritesPage extends React.Component {
                             title={`${item["givenName"]} ${item["familyName"]}`}
                             description={getDescriptionElement(item["status"], item["statusValidity"])}
                             rightElement={<Icon onPress={() => this.onPressContact(item["phoneNumber"])} name="call"></Icon>}
-                            onPress={() => this.props.navigation.navigate('Contact', item)}
+                            onPress={() => {
+                                this.props.setSelectedContact(item)
+                                this.props.navigation.navigate('Contact', item)
+                            }}
                             onDelete={() => this.deleteContact(item)}
                         />
                         }
@@ -112,8 +113,6 @@ class FavoritesPage extends React.Component {
                             <Text>No favorites added!</Text>
                         </View>
                 }
-
-
             </SafeAreaView>
         );
     }
@@ -157,7 +156,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => (
     bindActionCreators({
         removeContact,
-        syncContacts
+        syncContacts,
+        setSelectedContact,
     }, dispatch)
 );
 
