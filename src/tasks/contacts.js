@@ -4,7 +4,7 @@ import Contacts from "react-native-contacts";
 import { UpdateMode } from "realm";
 import { selectContactPhone } from 'react-native-select-contact';
 
-const UPCOMING_MEETING_TIME_INTERVAL = 15 * 60000;
+const UPCOMING_MEETING_TIME_INTERVAL = 15 * 60 * 1000;
 
 function selectContactAndSave() {
     return selectContactPhone()
