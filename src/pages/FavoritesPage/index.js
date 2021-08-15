@@ -19,6 +19,9 @@ import { removeContactFromDB } from '../../tasks/contacts'
 import { getSortedContacts } from '../../tasks/contacts'
 import { sync } from '../../tasks/tasks'
 import RNCalendarEvents from "react-native-calendar-events";
+import 'react-native-gesture-handler'
+
+const REFRESH_INTERVAL = 30 * 1000;
 class FavoritesPage extends React.Component {
 
     constructor(props) {
@@ -32,6 +35,11 @@ class FavoritesPage extends React.Component {
     async componentDidMount() {
         this.refreshUI();
         this.syncAndRefresh();
+        this.interval = setInterval(() => this.syncAndRefresh(), REFRESH_INTERVAL);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
     }
 
     async syncAndRefresh() {

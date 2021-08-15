@@ -1,9 +1,10 @@
 import { syncCalendarEvents, syncRegisteredContactEvents } from './events'
-import { updateRegisteredUserStatus } from './contacts'
+import { updateRegisteredUserStatus, updateRegisteredUsers } from './contacts'
 import { store } from '../redux/store'
 
 function sync(uid, calendars) {
     return syncCalendarEvents(calendars, uid)
+        .then(() => updateRegisteredUsers())
         .then(() => syncRegisteredContactEvents())
         .then(() => updateRegisteredUserStatus())
 

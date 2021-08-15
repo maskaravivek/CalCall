@@ -4,7 +4,7 @@ import Contacts from "react-native-contacts";
 import { UpdateMode } from "realm";
 import { selectContactPhone } from 'react-native-select-contact';
 
-const UPCOMING_MEETING_TIME_INTERVAL = 100 * 15 * 60000;
+const UPCOMING_MEETING_TIME_INTERVAL = 15 * 60000;
 
 function selectContactAndSave() {
     return selectContactPhone()
@@ -13,15 +13,31 @@ function selectContactAndSave() {
                 return null;
             }
 
-            let { contact } = selection;
+            let { contact, selectedPhone } = selection;
             contact["favorite"] = true
             return getPhoneNumberUidMap()
                 .then(phoneNumberUidMap => {
-                    addContact(contact, contact.phones[0].number, phoneNumberUidMap);
+                    addContact(contact, selectedPhone.number, phoneNumberUidMap);
                 }).then(() => {
                     return getSortedContacts();
                 })
         });
+}
+
+async function updateRegisteredUsers() {
+    const contacts = realm.objects("Contact");
+    const unregisteredContacts = contacts.filtered("uid == null")
+    return getPhoneNumberUidMap()
+        .then(phoneNumberUidMap => {
+            unregisteredContacts.forEach(contact => {
+                const phoneNumber = cleanedPhoneNumber(contact.phoneNumber);
+                if (cleanedPhoneNumber(contact.phoneNumber) in phoneNumberUidMap) {
+                    realm.write(() => {
+                        contact.uid = phoneNumberUidMap[phoneNumber]
+                    });
+                }
+            })
+        }).then(() => console.log("Registered users synced"))
 }
 
 async function syncDeviceContacts() {
@@ -171,4 +187,5 @@ export {
     getSortedContacts,
     selectContactAndSave,
     removeContactFromDB,
+    updateRegisteredUsers,
 }
